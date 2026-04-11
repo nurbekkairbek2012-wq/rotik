@@ -515,6 +515,17 @@ func main() {
 	initDB()
 	r := gin.Default()
 
+	// --- ИСПРАВЛЕННЫЙ БЛОК ---
+
+    // Используем "r", так как выше ты объявил именно "r"
+    r.Static("/", "./")
+
+    r.GET("/", func(c *gin.Context) {
+        c.File("login.html")
+    })
+
+    // --- КОНЕЦ БЛОКА ---
+
 	r.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
