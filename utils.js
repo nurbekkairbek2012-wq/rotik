@@ -9,7 +9,7 @@
 //  На продакшн-сервере подставится реальный домен
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:8080'
-    : 'https://your-production-domain.com'; // <- поменяй на свой домен при деплое
+    : 'https://kenesary-server.onrender.com'; // <- поменяй на свой домен при деплое
  
  
 // ------ 2. ЗАГОЛОВКИ С ТОКЕНОМ ----------------------------
