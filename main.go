@@ -515,18 +515,16 @@ func main() {
 	initDB()
 	r := gin.Default()
 
-	// 1. Вместо Static("/", "./") используем StaticFile для конкретных страниц
-    r.StaticFile("/", "./login.html")      // Главная страница теперь сразу login.html
-    r.StaticFile("/login", "./login.html") 
-    r.StaticFile("/index.html", "./login.html")
+	// 1. Главная страница
+    r.StaticFile("/", "./login.html")
 
-    // 2. Раздаем JS-файлы отдельно, чтобы не было конфликта
-    // Если у тебя JS файлы лежат прямо в корне, можно сделать так:
-    r.StaticFile("/auth.js", "./auth.js")
-    r.StaticFile("/utils.js", "./utils.js")
-    // Если есть картинки или CSS в папках:
-    // r.Static("/assets", "./assets")
-	
+    // 2. Ловушка для всех остальных файлов (CSS, JS, другие HTML)
+    r.NoRoute(func(c *gin.Context) {
+        path := c.Request.URL.Path
+        // Пытаемся отдать файл из корня проекта
+        c.File("." + path)
+    })
+
 	r.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
