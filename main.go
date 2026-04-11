@@ -719,8 +719,3 @@ func UpdateAvatar(c *gin.Context) {
 	db.Model(&User{}).Where("id = ?", userID).Update("avatar", req.AvatarID)
 	c.JSON(http.StatusOK, gin.H{"avatar": req.AvatarID})
 }
-port := os.Getenv("PORT")
-if port == "" {
-    port = "8080" // Фолбэк для локальной разработки
-}
-r.Run(":" + port)
