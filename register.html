@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="view-transition" content="same-origin">
+    <title>Тіркелу | Kenesary</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="auth-container">
+        <h2>Тіркелу</h2>
+        <form id="registerForm">
+            <div class="input-group">
+                <label for="reg-username">Пайдаланушы аты</label>
+                <input type="text" id="reg-username" required placeholder="Придумайте ник">
+            </div>
+            <div class="input-group">
+                <label for="reg-password">Құпия сөз</label>
+                <input type="password" id="reg-password" required placeholder="Придумайте пароль">
+            </div>
+            <div class="input-group">
+                <label for="reg-confirm">Құпия сөзді қайталаңыз</label>
+                <input type="password" id="reg-confirm" required placeholder="Повторите пароль">
+            </div>
+            <button type="submit" class="btn">Аккаунты құру</button>
+        </form>
+        <div class="switch-page">
+            Сізде бұрыннан аккаунт бар ма? <a href="login.html">Кіру</a>
+        </div>
+    </div>
+
+    <script src="utils.js"></script>
+    <script src="auth.js"></script>
+</body>
+</html>

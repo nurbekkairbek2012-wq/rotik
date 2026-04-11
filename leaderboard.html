@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Рейтинг | Shadow of the Steppe</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="utils.js"></script>
+    <script>requireAuth();</script>
+
+    <style>
+        :root {
+            --accent-gold: #D4AF37;
+            --accent-glow: rgba(212, 175, 55, 0.4);
+            --bg-base: #0a0f16;
+            --glass-bg: rgba(20, 25, 35, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(212, 175, 55, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(30, 58, 138, 0.1), transparent 25%);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+        }
+
+        /* --- Сайдбар (Тот же дизайн) --- */
+        .sidebar {
+            width: 90px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 0;
+            justify-content: space-between;
+            z-index: 50;
+            border-right: 1px solid var(--glass-border);
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            opacity: 0.6;
+        }
+
+        .nav-btn img { width: 24px; height: 24px; filter: invert(1); }
+
+        .nav-btn:hover, .nav-btn.active {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .profile-avatar-btn {
+            width: 50px; height: 50px; border-radius: 50%;
+            border: 2px solid var(--accent-gold); cursor: pointer;
+        }
+
+        /* --- Контент --- */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 40px 60px;
+            position: relative;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .header-title {
+            font-family: 'Cinzel', serif;
+            font-size: 36px;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* --- Секция "Закрыто" --- */
+        .maintenance-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .lock-icon-wrapper {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .lock-glow {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px; height: 200px;
+            background: var(--accent-gold);
+            filter: blur(80px);
+            opacity: 0.2;
+            animation: pulse 3s infinite;
+        }
+
+        .lock-icon {
+            width: 120px;
+            height: 120px;
+            filter: drop-shadow(0 0 20px var(--accent-gold));
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.1; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.3; transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .maintenance-title {
+            font-family: 'Cinzel', serif;
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #fff;
+            letter-spacing: 3px;
+        }
+
+        .maintenance-subtitle {
+            font-size: 18px;
+            color: var(--text-muted);
+            max-width: 500px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .badge-status {
+            display: inline-block;
+            padding: 8px 24px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid var(--accent-gold);
+            border-radius: 100px;
+            color: var(--accent-gold);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .btn-back {
+            padding: 16px 40px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-back:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: #fff;
+        }
+
+        /* Эффект шума/тумана */
+        .fog-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/asfalt-dark.png');
+            opacity: 0.05;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="fog-overlay"></div>
+
+    <nav class="sidebar glass">
+        <div class="nav-items">
+            <a href="profile.html">
+                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="profile-avatar-btn" alt="Avatar">
+            </a>
+        </div>
+        
+        <div class="nav-items">
+            <a href="main.html" class="nav-btn" title="Басты бет"><img src="https://cdn-icons-png.flaticon.com/512/1946/1946436.png" alt="Home"></a>
+            <a href="shop.html" class="nav-btn" title="Дүкен"><img src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png" alt="Shop"></a>
+            <a href="#" class="nav-btn active" title="Рейтинг"><img src="https://cdn-icons-png.flaticon.com/512/3112/3112946.png" alt="Leaderboard"></a>
+        </div>
+
+        <div class="nav-items">
+            <a href="#" class="nav-btn" title="Баптаулар"><img src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png" alt="Settings"></a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="header">
+            <h1 class="header-title">Shadow of the Steppe</h1>
+        </header>
+
+        <div class="maintenance-container">
+            <div class="badge-status">Техникалық жұмыстар</div>
+            
+            <div class="lock-icon-wrapper">
+                <div class="lock-glow"></div>
+                <img src="https://cdn-icons-png.flaticon.com/512/2889/2889676.png" alt="Locked" class="lock-icon">
+            </div>
+
+            <h2 class="maintenance-title">Рейтинг жабық</h2>
+            <p class="maintenance-subtitle">
+                Ұлы даланың ең мықты жауынгерлерінің тізімі дайындалуда. 
+                Көп ұзамай өз есіміңді осы жерден көре аласың!
+            </p>
+
+            <a href="main.html" class="btn-back">Артқа қайту</a>
+        </div>
+    </main>
+
+    <script>
+        // Плавный переход между страницами
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                if (this.hostname === window.location.hostname && this.getAttribute('href') !== '#') {
+                    e.preventDefault();
+                    document.body.style.transition = 'opacity 0.4s';
+                    document.body.style.opacity = '0';
+                    setTimeout(() => window.location.href = this.href, 400);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

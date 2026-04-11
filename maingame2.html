@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сұрақ-жауап: Кенесары хан - Shadow of the Steppe</title>
+    
+    <script src="utils.js"></script>
+    <script>requireAuth();</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* НЕГІЗГІ СТИЛЬДЕР */
+        :root {
+            --accent-gold: #D4AF37;
+            --accent-glow: rgba(212, 175, 55, 0.4);
+            --bg-base: #0a0f16;
+            --glass-bg: rgba(20, 25, 35, 0.85);
+            --glass-border: rgba(212, 175, 55, 0.2);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        body {
+            margin: 0; padding: 0; font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-base);
+            background-image: radial-gradient(circle at 15% 50%, rgba(212, 175, 55, 0.08), transparent 25%),
+                              radial-gradient(circle at 85% 30%, rgba(30, 58, 138, 0.1), transparent 25%);
+            color: var(--text-main); min-height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            overflow-x: hidden; user-select: none;
+            opacity: 0; transition: opacity 1s ease;
+        }
+
+        body.loaded { opacity: 1; }
+
+        .glass {
+            background: var(--glass-bg); backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        h1, h2, h3 { font-family: 'Cinzel', serif; }
+
+        /* ШЫҒУ ТҮЙМЕСІ */
+        .back-btn {
+            position: absolute; top: 30px; right: 40px; font-size: 40px;
+            color: var(--accent-gold); text-decoration: none;
+            transition: 0.3s; cursor: pointer; z-index: 200;
+        }
+        .back-btn:hover { color: var(--danger); transform: scale(1.2); }
+
+        .screen {
+            display: none; flex-direction: column; align-items: center;
+            justify-content: center; width: 90%; max-width: 900px;
+            text-align: center; padding: 40px; opacity: 0; transition: opacity 0.4s ease-in-out;
+        }
+        .screen.active { display: flex; opacity: 1; }
+        .fade-content { width: 100%; transition: opacity 0.3s ease-in-out; }
+        .fade-content.hidden { opacity: 0; }
+
+        .title-gold {
+            font-size: 3rem; text-transform: uppercase; letter-spacing: 2px;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-gold) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 10px; text-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--accent-gold) 0%, #B8860B 100%);
+            color: #000; border: none; padding: 15px 40px; font-size: 1.1rem;
+            font-weight: 700; border-radius: 12px; cursor: pointer;
+            transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px;
+            margin: 10px; box-shadow: 0 0 15px var(--accent-glow);
+        }
+        .btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 15px 30px rgba(212, 175, 55, 0.6); }
+        .btn-outline { background: transparent; border: 2px solid var(--accent-gold); color: var(--accent-gold); box-shadow: none; }
+        .btn-outline:hover { background: rgba(212, 175, 55, 0.1); box-shadow: 0 0 15px var(--accent-glow); }
+
+        /* ОЙЫН ПРОЦЕСІ */
+        .hud {
+            display: flex; justify-content: space-between; width: 100%;
+            margin-bottom: 20px; font-size: 1.2rem; font-weight: 600; color: var(--accent-gold);
+            padding: 15px 20px; border-bottom: 1px solid var(--glass-border);
+        }
+
+        .question-box { padding: 30px; margin-bottom: 25px; width: 100%; min-height: 120px; display: flex; align-items: center; justify-content: center; }
+        .question-text { font-size: 1.4rem; margin: 0; line-height: 1.5; font-weight: 500; }
+
+        .answers-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%; }
+        .answer-btn {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main); padding: 20px; border-radius: 12px; font-size: 1.1rem;
+            cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center;
+        }
+        .answer-btn:hover { background: rgba(212, 175, 55, 0.2); border-color: var(--accent-gold); }
+        .answer-btn.correct { background: rgba(16, 185, 129, 0.2) !important; border-color: var(--success); color: var(--success); font-weight: bold;}
+        .answer-btn.wrong { background: rgba(239, 68, 68, 0.2) !important; border-color: var(--danger); color: #ff9999; }
+
+        /* РЕЙТИНГ ЖӘНЕ АВАТАР (КЕСТЕ ЖАҚСАРТЫЛДЫ) */
+        .scroll-box { padding: 20px; border-radius: 15px; width: 100%; margin-bottom: 20px; overflow-y: auto; max-height: 450px; }
+        .scroll-box::-webkit-scrollbar { width: 6px; }
+        .scroll-box::-webkit-scrollbar-track { background: transparent; }
+        .scroll-box::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 10px; }
+
+        table { 
+            width: 100%; 
+            border-collapse: separate; 
+            border-spacing: 0 8px; 
+            color: white; 
+            table-layout: fixed; /* Кестенің бағандарын бірқалыпты ұстау үшін */
+        }
+        
+        /* Бағандардың нақты ені мен туралануы */
+        th:nth-child(1), td:nth-child(1) { width: 15%; text-align: center; } /* Орын */
+        th:nth-child(2), td:nth-child(2) { width: 45%; text-align: left; }   /* Ойыншы */
+        th:nth-child(3), td:nth-child(3) { width: 20%; text-align: center; } /* Ұпай */
+        th:nth-child(4), td:nth-child(4) { width: 20%; text-align: center; } /* Уақыт */
+
+        th { padding: 15px; color: var(--accent-gold); border-bottom: 1px solid var(--glass-border); font-family: 'Cinzel'; font-size: 1.1rem; }
+        td { padding: 10px 15px; background: rgba(255,255,255,0.03); border-radius: 8px; vertical-align: middle; }
+        
+        /* Аватар және Никнейм стилі */
+        .player-info-cell { display: flex; align-items: center; gap: 12px; overflow: hidden; }
+        .player-avatar { width: 40px; height: 40px; min-width: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-gold); display: block; }
+        .player-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; font-size: 1.05rem; }
+
+        .rank-1 td { background: rgba(212, 175, 55, 0.15); color: var(--accent-gold); font-weight: bold; border: 1px solid rgba(212, 175, 55, 0.5); border-left: none; border-right: none;}
+        .rank-1 td:first-child { border-left: 1px solid rgba(212, 175, 55, 0.5); }
+        .rank-1 td:last-child { border-right: 1px solid rgba(212, 175, 55, 0.5); }
+
+        .rank-2 td { background: rgba(192, 192, 192, 0.1); color: #e2e8f0; font-weight: bold; }
+        .rank-3 td { background: rgba(205, 127, 50, 0.1); color: #fbd38d; font-weight: bold; }
+
+        .coin-reward { font-size: 1.5rem; color: #f1c40f; font-weight: bold; margin-bottom: 20px; text-shadow: 0 0 10px rgba(241, 196, 15, 0.5); }
+        .mistake-item { border-bottom: 1px solid var(--glass-border); padding: 15px 0; text-align: left; }
+        .mistake-q { color: var(--accent-gold); font-weight: 600; margin-bottom: 5px; font-size: 1.1rem;}
+        .mistake-wrong { color: var(--danger); font-size: 0.95rem; margin-bottom: 3px;}
+        .mistake-right { color: var(--success); font-weight: bold; font-size: 0.95rem; }
+
+        @media (max-width: 768px) { 
+            .answers-grid { grid-template-columns: 1fr; } 
+            .title-gold { font-size: 2rem; } 
+            table th, table td { padding: 8px; font-size: 0.85rem;} 
+            .player-avatar {width: 32px; height: 32px; min-width: 32px;}
+            .player-name { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body onload="document.body.classList.add('loaded')">
+
+    <a class="back-btn" onclick="smoothExit()">&times;</a>
+
+    <div id="start-screen" class="screen active glass">
+        <h1 class="title-gold">КЕНЕСАРЫ ХАН КӨТЕРІЛІСІ</h1>
+        <p style="font-size: 1.2rem; margin-bottom: 30px; color: var(--text-muted);">20 Сұрақ | Уақыт шектеулі | Жоғары қиындық</p>
+        <button class="btn" id="startBtn">ОЙЫНДЫ БАСТАУ</button>
+        <button class="btn btn-outline" id="lbBtn">🏆 РЕЙТИНГ</button>
+    </div>
+
+    <div id="quiz-screen" class="screen glass" style="padding: 20px;">
+        <div class="hud">
+            <span id="progressText">Сұрақ: 1/20</span>
+            <span id="timerText" style="font-family: monospace; font-size: 1.4rem;">00:00.000</span>
+        </div>
+        
+        <div id="quiz-content" class="fade-content">
+            <div class="question-box">
+                <p id="question" class="question-text">Сұрақ...</p>
+            </div>
+            <div id="answers" class="answers-grid"></div>
+        </div>
+    </div>
+
+    <div id="result-screen" class="screen glass">
+        <h1 id="result-title" class="title-gold">ОЙЫН АЯҚТАЛДЫ</h1>
+        <p style="color: var(--text-muted); font-size: 1.2rem;">Дұрыс жауаптар:</p>
+        <p id="score-text" style="font-size: 3rem; font-weight: 700; color: var(--accent-gold); margin: 10px 0;">0 / 20</p>
+        <p id="time-text" style="color: var(--text-main); margin-bottom: 10px; font-size: 1.2rem;">Уақыт: 00:00.000</p>
+        
+        <p id="coin-display" class="coin-reward"></p>
+        
+        <p id="save-status" style="color: var(--success); font-weight: bold; margin-bottom: 20px;"></p>
+
+        <button class="btn" onclick="location.reload()">ҚАЙТА ОЙНАУ</button>
+        <button class="btn" id="reviewBtn" style="background: linear-gradient(135deg, #e67e22 0%, #d35400 100%); display: none;">ҚАТЕЛЕРМЕН ЖҰМЫС</button>
+        <button class="btn btn-outline" id="resultLbBtn">🏆 РЕЙТИНГТІ КӨРУ</button>
+    </div>
+
+    <div id="review-screen" class="screen glass">
+        <h2 class="title-gold">ҚАТЕЛЕР ТІЗІМІ</h2>
+        <div class="scroll-box" id="review-box"></div>
+        <button class="btn btn-outline" onclick="document.getElementById('review-screen').classList.remove('active'); document.getElementById('result-screen').classList.add('active');">АРТҚА</button>
+    </div>
+
+    <div id="leaderboard-screen" class="screen glass">
+        <h2 class="title-gold">🏆 ТОП 10 ҮЗДІК</h2>
+        <p id="loading-text" style="color: var(--accent-gold);">Деректер жүктелуде...</p>
+        
+        <div class="scroll-box" style="padding: 0;">
+            <table id="leaderboard-table"></table>
+        </div>
+
+        <button class="btn btn-outline" onclick="location.reload()" style="margin-top: 20px;">МӘЗІРГЕ ОРАЛУ</button>
+    </div>
+
+    <script>
+        function smoothExit() {
+            document.body.style.opacity = '0';
+            setTimeout(() => { window.location.href = 'maingame1.html'; }, 500);
+        }
+    </script>
+
+    <script>
+
+        const factualQuestions = [
+            { id: 0, q: "Кенесары хан бастаған ұлт-азаттық көтеріліс қай жылдары болды?", a: ["1837-1847 жж.", "1836-1838 жж.", "1783-1797 жж.", "1858-1860 жж."], correct: 0 },
+            { id: 1, q: "Кенесары көтерілісінің екінші (шарықтау) кезеңі қашан болды?", a: ["1841-1845 жж.", "1837-1840 жж.", "1845-1847 жж.", "1838-1841 жж."], correct: 0 },
+            { id: 2, q: "Кенесары қай жылы барлық үш жүздің ханы болып сайланды?", a: ["1841 жылы қыркүйекте", "1838 жылы мамырда", "1845 жылы қазанда", "1837 жылы көктемде"], correct: 0 },
+            { id: 3, q: "Көтерілістің соңғы кезеңі (Жетісу мен Қырғыз жеріндегі) қай жылдарды қамтиды?", a: ["1846-1847 жж.", "1841-1845 жж.", "1845-1846 жж.", "1844-1847 жж."], correct: 0 },
+            { id: 4, q: "Көтеріліс ресми түрде қай айда, қай жылы басталды деп есептеледі?", a: ["1837 жылы қарашада (Ақтау бекінісіне шабуыл)", "1838 жылы мамырда (Ақмолаға шабуыл)", "1836 жылы жазда", "1841 жылы күзде"], correct: 0 },
+            { id: 5, q: "Патша үкіметінің қай реформасы көтерілістің шығуына негізгі себеп болды?", a: ["1822 және 1824 жылғы жарғылар", "1867-1868 жж. реформалар", "1891 жылғы Ереже", "1731 жылғы ант қабылдау"], correct: 0 },
+            { id: 6, q: "Көтерілістің басты себептерінің бірі патша үкіметінің қандай әрекеті еді?", a: ["Жаңа бекіністер салып, қазақ жерлерін тартып алуы", "Ислам дініне тыйым салуы", "Жалпыға бірдей әскери міндеткерлік енгізуі", "Мал санын шектеуі"], correct: 0 },
+            { id: 7, q: "Орта жүздегі хандық билікті жойған құжат?", a: ["Сібір қазақтарының жарғысы (1822 ж.)", "Орынбор қазақтарының жарғысы (1824 ж.)", "Түркістан ережесі", "Дала ережесі"], correct: 0 },
+            { id: 8, q: "Кенесары көтерілісінің себебіне Қоқан хандығының қандай саясаты кіреді?", a: ["Оңтүстік қазақтарына ауыр салықтар салып, қысым жасауы", "Орыстармен одақтасуы", "Қытаймен шекараны жабуы", "Жетісуді Ресейге беруі"], correct: 0 },
+            { id: 9, q: "Кенесары ханның басты саяси мақсаты қандай болды?", a: ["Абылай хан тұсындағы тәуелсіз Қазақ хандығын қалпына келтіру", "Ресей империясының құрамына автономия болып кіру", "Қоқан хандығына толық бағыну", "Тек Кіші жүзді ғана азат ету"], correct: 0 },
+            { id: 10, q: "Патша І Николайға жазған хатында Кенесары нені талап етті?", a: ["Бекіністерді қиратып, қазақ жерінен орыс әскерін әкетуді", "Өзіне генерал шенін беруді", "Керуендерден салық алу құқығын", "Қоқанға қарсы орыстардан қару сұрады"], correct: 0 },
+            { id: 11, q: "Кенесарының Орта Азия хандықтарына қатысты мақсаты?", a: ["Олардың қазақ жерлеріне басқыншылығын тоқтату", "Хиуа мен Бұхараны жаулап алу", "Ташкентті Ресейге беріп қою", "Олармен діни одақ құру"], correct: 0 },
+            { id: 12, q: "Кенесары құрған мемлекеттік құрылым қалай аталды?", a: ["Орталықтандырылған Қазақ хандығы", "Қазақ Республикасы", "Автономиялық округ", "Имамдық"], correct: 0 },
+            { id: 13, q: "Кенесарының атасы кім болған?", a: ["Абылай хан", "Әбілқайыр хан", "Кенесарының әкесі Абылай еді", "Тәуке хан"], correct: 0 },
+            { id: 14, q: "Кенесары Қасымұлы қай жылы дүниеге келген?", a: ["1802 жылы", "1795 жылы", "1812 жылы", "1824 жылы"], correct: 0 },
+            { id: 15, q: "Кенесарының өзіне дейін көтерілісті бастаған, Ташкентте өлтірілген ағасы?", a: ["Саржан", "Есенгелді", "Қасым", "Наурызбай"], correct: 0 },
+            { id: 16, q: "Кенесарының ең жақын серігі, батыр інісі кім?", a: ["Наурызбай", "Сырым", "Жоламан", "Исатай"], correct: 0 },
+            { id: 17, q: "Кенесарының қарындасы, көтеріліске белсене қатысқан батыр қыз?", a: ["Бопай", "Айғаным", "Домалақ ана", "Зере"], correct: 0 },
+            { id: 18, q: "1836 жылы Қоқан бектері Кенесарының кімдерін зұлымдықпен өлтірді?", a: ["Әкесі Қасымды және ағасы Есенгелдіні", "Інісі Наурызбайды", "Баласы Сыздықты", "Қарындасы Бопайды"], correct: 0 },
+            { id: 19, q: "Қай бекіністің салынуы Кенесарының ашық күреске шығуына түрткі болды?", a: ["Ақтау және Ақмола бекіністерінің", "Орынбор мен Троицк", "Верный (Алматы)", "Омбы мен Петропавл"], correct: 0 },
+            { id: 20, q: "Патша үкіметінің қазақтардан қандай салықты күштеп жинауы халықтың ашуын тудырды?", a: ["Түтін салығын (ясақ)", "Зекетті", "Жер салығын", "Тұз салығын"], correct: 0 },
+            { id: 21, q: "1837 жылы Кенесары бастаған топ алғаш рет кімнің отрядына шабуыл жасады?", a: ["Хорунжий Рытовтың казак отрядына", "Генерал Перовскийге", "Сұлтан Жантөринге", "Қоқан бектеріне"], correct: 0 },
+            { id: 22, q: "Көтерілістің негізгі қозғаушы күші кімдер болды?", a: ["Қарапайым шаруалар мен батырлар", "Тек қана сұлтандар", "Орыс казактары", "Діни қайраткерлер"], correct: 0 },
+            { id: 23, q: "Кенесарының әскерінде қандай ұлт өкілдері болды?", a: ["Қазақтар, орыстар, башқұрттар, поляктар", "Тек қазақтар", "Тек қазақтар мен қырғыздар", "Қазақтар мен қытайлар"], correct: 0 },
+            { id: 24, q: "Кенесары жасағындағы орыс және поляк қашқындары немен айналысты?", a: ["Қазақтарға отты қару жасауды және құюды үйретті", "Дипломатиялық келіссөз жүргізді", "Ат бақты", "Тек аудармашы болды"], correct: 0 },
+            { id: 25, q: "Шаруалардан Кенесары әскерін ұстау үшін қандай салық жиналды?", a: ["Зекет және ұшыр", "Түтін салығы", "Ясақ", "Харадж"], correct: 0 },
+            { id: 26, q: "Көтеріліс қазақ даласының қай бөлігін қамтыды?", a: ["Үш жүздің де аумағын (бүкіл Қазақстанды)", "Тек Кіші жүзді", "Тек Жетісуды", "Тек Сырдария бойын"], correct: 0 },
+            { id: 27, q: "1841-1845 жылдары Кенесары хандығының орталығы (ордасы) қай жерде орналасты?", a: ["Торғай мен Ұлытау өңірінде", "Ақмолада", "Түркістанда", "Алтайда"], correct: 0 },
+            { id: 28, q: "Көтерілісшілердің саны ең жоғары шегіне жеткенде қанша болды?", a: ["20 000 жауынгер", "5 000 жауынгер", "50 000 жауынгер", "100 000 жауынгер"], correct: 0 },
+            { id: 29, q: "1846 жылы патша әскерінің қысымымен Кенесары хан қай аймаққа шегінуге мәжбүр болды?", a: ["Жетісу мен Іле бойына", "Хиуа хандығына", "Сібірге", "Маңғыстауға"], correct: 0 },
+            { id: 30, q: "Кенесарыға қарсы Орынбор корпусын кім басқарды?", a: ["Генерал В. Перовский", "Генерал Колпаковский", "Генерал Черняев", "Патша Николай І"], correct: 0 },
+            { id: 31, q: "Патша үкіметі жағында Кенесарыға қарсы соғысқан Кіші жүз сұлтаны?", a: ["Ахмет Жантөрин", "Қасым Абылайұлы", "Сүйік Абылайұлы", "Батыр сұлтан"], correct: 0 },
+            { id: 32, q: "1843 жылы патша үкіметі Кенесарының басы үшін қанша сыйақы тағайындады?", a: ["3000 рубль", "1000 рубль", "10 000 рубль", "Сыйақы тағайындамады"], correct: 0 },
+            { id: 33, q: "Жазалаушы отрядтар қазақ ауылдарына қандай тактика қолданды?", a: ["Ауылдарды өртеп, малдарын айдап әкетті", "Тек келіссөз жүргізді", "Шаруаларға жер берді", "Мұсылман мешіттерін салды"], correct: 0 },
+            { id: 34, q: "Сібір ведомствосы тарапынан Кенесарыға қарсы әскерді басқарған генерал?", a: ["П. Горчаков", "Г. Миллер", "В. Обручев", "М. Сперанский"], correct: 0 },
+            { id: 35, q: "1838 жылы мамырда Кенесары әскері қандай маңызды бекіністі өртеп жіберді?", a: ["Ақмола бекінісін", "Омбы қамалын", "Орынборды", "Семейді"], correct: 0 },
+            { id: 36, q: "1844 жылы шілдеде Кенесары кімнің отрядын толықтай талқандады?", a: ["Сұлтан Ахмет Жантөриннің отрядын", "Генерал Перовскийді", "Қоқан ханының әскерін", "Қырғыз манаптарын"], correct: 0 },
+            { id: 37, q: "1841 жылы Кенесары Қоқан хандығының қандай қамалдарына шабуыл жасап, басып алды?", a: ["Созақ, Жаңақорған, Ақмешіт", "Ташкент, Самарқанд", "Пішпек, Тоқмақ", "Сайрам, Түркістан"], correct: 0 },
+            { id: 38, q: "Кенесарының соңғы шайқасы (1847 ж.) қай жерде өтті?", a: ["Майтөбе (Кекілік-Сеңгір) шатқалында", "Аягөз бойында", "Орбұлақта", "Торғай даласында"], correct: 0 },
+            { id: 39, q: "Кенесары хан қай жылы, кімдердің қолынан қаза тапты?", a: ["1847 жылы, қырғыз манаптарының қолынан", "1845 жылы, орыс казактарынан", "1847 жылы, Қоқан бектерінен", "1850 жылы, өз адамдарының сатқындығынан"], correct: 0 },
+            { id: 40, q: "Кенесары ханның қазасынан кейін Қазақстанда қандай тарихи процесс жылдамдады?", a: ["Қазақстанды Ресей империясының толық жаулап алуы", "Қазақ хандығының қайта жаңғыруы", "Қоқан хандығының күшеюі", "Қазақтардың Қытайға жаппай көшуі"], correct: 0 },
+            { id: 41, q: "Көтеріліс жеңілгеннен кейін Кенесарының ұлы Сыздық төре не істеді?", a: ["Күресті жалғастырып, Қоқан жағында орыстарға қарсы соғысты", "Орыс армиясына қызметке кірді", "Қырғыздармен бейбіт бітім жасады", "Түркияға көшіп кетті"], correct: 0 },
+            { id: 42, q: "Көтерілістің тарихи маңызы қандай?", a: ["Ұлт-азаттық рухты оятып, ең ірі әрі ұзақ көтеріліс ретінде тарихта қалды", "Патша үкіметіне ешқандай зиян тигізбеді", "Тек Кіші жүздің ғана тарихында қалды", "Бекіністер салуды біржола тоқтатты"], correct: 0 },
+            
+            // Концептуалды сұрақтар
+            { id: 43, q: "Неліктен Кенесары көтерілісі қазақ тарихындағы ең ірі ұлт-азаттық қозғалыс саналады?", a: ["Барлық Үш жүзді қамтып, жалпыұлттық сипат алғандықтан", "Ең көп қару қолданылғандықтан", "Басқа елдердің көмегі тигендіктен", "Тек бір жыл ішінде жеңіске жеткендіктен"], correct: 0 },
+            { id: 44, q: "Кенесарының 1841 жылы 'Хан' сайлануының саяси мәні неде?", a: ["Ресей жойған Қазақ хандығының мемлекеттілігін қайта қалпына келтіруі", "Өзін патшамен теңестіруі", "Діни көсем (имам) атануы", "Жай ғана әскери шен алуы"], correct: 0 },
+            { id: 45, q: "Кейбір қазақ сұлтандары (мысалы, Жантөрин, Аслан) неге Кенесарыға қарсы шықты?", a: ["Патша берген артықшылықтары мен жалақысынан айырылып қалудан қорықты", "Кенесарының тегі төре емес еді", "Олар Қоқан хандығына бағынды", "Кенесары олардың жерін тартып алды"], correct: 0 },
+            { id: 46, q: "Кенесары әскеріндегі қатаң тәртіптің себебі неде?", a: ["Тұрақты, ұйымдасқан әскерсіз империяға төтеп беру мүмкін еместігінен", "Ханның қатыгездігінен", "Ислам шариғаты тек соны талап еткендіктен", "Көшпелі дәстүрде тек өлім жазасы болғандықтан"], correct: 0 },
+            { id: 47, q: "Кенесары неліктен екі майданда (Ресей және Қоқан) қатар соғысуға мәжбүр болды?", a: ["Екі жақ та қазақ жерлерін отарлап, халыққа зорлық-зомбылық көрсеткендіктен", "Стратегиялық қателігінен", "Қоқан орыстармен одақтас болғандықтан", "Қару-жарағы өте көп болғандықтан"], correct: 0 },
+            { id: 48, q: "Қырғыз манаптары Орман, Жантайлардың Кенесарыға қарсы шығуының басты себебі?", a: ["Кенесарының оларға Ресей мен Қоқанға қарсы ортақ одақ құру талабын қабылдамауы", "Қырғыздардың орыстарды қорғауы", "Кенесарының ислам дініне қарсы болуы", "Қырғыздардың Қытайға бағынуы"], correct: 0 },
+            { id: 49, q: "Кенесары хандығындағы сот реформасының мәні?", a: ["Билер сотын сақтай отырып, маңызды істерді ханның өзі қарауы (орталықтандыру)", "Билер сотын толық жойып, орыс сотын енгізу", "Шариғатты ғана қалдырып, дәстүрді жою", "Сот жүйесін мүлдем алып тастау"], correct: 0 },
+            { id: 50, q: "Кенесары көтерілісінің жеңілуінің негізгі ішкі себебі неде болды?", a: ["Рубасылар мен сұлтандар арасындағы ауызбіршіліктің болмауы", "Азық-түліктің бітуі", "Халықтың мүлдем қолдамауы", "Кенесарының кенеттен ауырып қалуы"], correct: 0 },
+            { id: 51, q: "Кенесарының Жетісуға (Ұлы жүзге) шегінуіндегі стратегиялық қателігі?", a: ["Сенімді тылынан (Орта жүз) үзіліп, жат аймақта қоршауда қалуы", "Таулы жерде соғыса алмауы", "Қытаймен соғысып қалуы", "Қаруын Торғайда тастап кетуі"], correct: 0 },
+            { id: 52, q: "Патша үкіметі Кенесары көтерілісінен қандай сабақ алды?", a: ["Қазақ даласын отарлауда әскери күшпен қатар, жергілікті элитаны бөлшектеу саясатын күшейтті", "Қазақтарға тәуелсіздік беру керектігін түсінді", "Бекіністер салуды доғарды", "Орта Азияға жорығын тоқтатты"], correct: 0 },
+            { id: 53, q: "Рүстем төре мен Сыпатай батырдың Майтөбе шайқасындағы әрекеті көтеріліске қалай әсер етті?", a: ["Түн ішінде өз жасақтарымен кетіп қалып, Кенесарыны қоршауда қалдырды", "Жаңа қару әкеліп, көмектесті", "Қырғыздармен бейбіт келісім жасады", "Орыс әскерін тоқтатты"], correct: 0 },
+            { id: 54, q: "Кенесары дипломатиясының басты ерекшелігі?", a: ["Көрші елдерге елшілер жіберіп, орыстарға қарсы одақ іздеуі", "Тек қаруға сеніп, ешкіммен сөйлеспеуі", "Ресейге өзін бағынышты санауы", "Ағылшындардан көмек сұрауы"], correct: 0 },
+            { id: 55, q: "Барон Врангельдің «Кенесары қазақтарды біріктіріп, үлкен күшке айналдырды» деген сөзі нені білдіреді?", a: ["Кенесарының әскери және саяси ұйымдастырушылық қабілетін мойындауын", "Оның Ресейге дос екенін", "Кенесарының әлсіздігін", "Патшаның бұйрығын орындағанын"], correct: 0 },
+            { id: 56, q: "Кенесары шаруашылық саласында қандай өзгерістер енгізді?", a: ["Егіншілікті дамытып, керуен саудасына бақылау орнатты", "Мал шаруашылығына тыйым салды", "Тек аңшылықпен айналысуды бұйырды", "Шетелдік тауарларды кіргізбеді"], correct: 0 },
+            { id: 57, q: "Кенесары тұлғасы қазіргі Қазақстан үшін ненің символы?", a: ["Мемлекеттік тәуелсіздік пен азаттық жолындағы табанды күрестің символы", "Қатыгездіктің символы", "Орыс-қазақ достығының символы", "Діни фанатизмнің символы"], correct: 0 }
+        ];
+
+        let currentQuestions = [], currentQuestionIndex = 0, score = 0;
+        let userAnswers = []; // индексы ответов игрока — отправляются на сервер
+        let startTime, timerInterval, elapsedMilliseconds = 0, mistakes = []; 
+        let userJustPlayed = false;
+
+        // getCurrentUser удалён — сервер идентифицирует игрока по JWT токену
+
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const reviewScreen = document.getElementById('review-screen');
+        const leaderboardScreen = document.getElementById('leaderboard-screen');
+        const quizContent = document.getElementById('quiz-content');
+        const questionEl = document.getElementById('question');
+        const answersEl = document.getElementById('answers');
+        const progressEl = document.getElementById('progressText');
+        const timerEl = document.getElementById('timerText');
+
+        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('lbBtn').addEventListener('click', () => showLeaderboard(false));
+        document.getElementById('resultLbBtn').addEventListener('click', () => showLeaderboard(true));
+        document.getElementById('reviewBtn').addEventListener('click', showReview);
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function formatTime(msTotal) {
+            let totalSeconds = Math.floor(msTotal / 1000);
+            let m = Math.floor(totalSeconds / 60); let s = totalSeconds % 60; let ms = msTotal % 1000;
+            return `${m < 10 ? "0"+m : m}:${s < 10 ? "0"+s : s}.${ms < 10 ? "00"+ms : (ms < 100 ? "0"+ms : ms)}`;
+        }
+
+        function startGame() {
+            score = 0; currentQuestionIndex = 0; elapsedMilliseconds = 0; mistakes = []; userAnswers = []; userJustPlayed = false;
+            let shuffledAll = shuffleArray([...factualQuestions]);
+            currentQuestions = shuffledAll.slice(0, 20);
+
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            quizScreen.classList.add('active');
+
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 50);
+            showQuestion();
+        }
+
+        function updateTimer() {
+            elapsedMilliseconds = Date.now() - startTime;
+            timerEl.innerText = formatTime(elapsedMilliseconds);
+        }
+
+        function showQuestion() {
+            quizContent.classList.remove('hidden');
+            let qData = currentQuestions[currentQuestionIndex];
+            progressEl.innerText = `Сұрақ: ${currentQuestionIndex + 1}/${currentQuestions.length}`;
+            questionEl.innerText = qData.q;
+            answersEl.innerHTML = '';
+
+            let options = qData.a.map((text, index) => ({ text: text, originalIndex: index }));
+            shuffleArray(options);
+
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn'; btn.innerText = opt.text;
+                btn._originalIndex = opt.originalIndex; // сохраняем для checkAnswer
+                btn.addEventListener('click', () => checkAnswer(opt.originalIndex === qData.correct, btn, qData, opt.originalIndex));
+                answersEl.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(isCorrect, btnElement, qData, chosenIndex) {
+            // Записываем question_id + выбранный индекс для отправки на сервер
+            userAnswers.push({ question_id: qData.id, chosen: chosenIndex });
+
+            const allBtns = answersEl.querySelectorAll('.answer-btn');
+
+            // Сначала подсвечиваем выбранную кнопку и правильный ответ
+            allBtns.forEach(btn => {
+                const btnOriginalIndex = btn._originalIndex;
+                if (btnOriginalIndex === qData.correct) {
+                    btn.classList.add('correct'); // всегда показываем правильный ответ
+                }
+                btn.replaceWith(btn.cloneNode(true)); // блокируем клики клонированием
+            });
+
+            // После клонирования заново находим нашу кнопку по тексту и красим в wrong
+            if (!isCorrect) {
+                const clonedBtns = answersEl.querySelectorAll('.answer-btn');
+                clonedBtns.forEach(btn => {
+                    if (btn.innerText === btnElement.innerText && !btn.classList.contains('correct')) {
+                        btn.classList.add('wrong');
+                    }
+                });
+                mistakes.push({ q: qData.q, wrong: btnElement.innerText, right: qData.a[qData.correct] });
+            } else {
+                score++;
+            }
+
+            setTimeout(() => {
+                quizContent.classList.add('hidden'); 
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    if (currentQuestionIndex < currentQuestions.length) showQuestion();
+                    else endGame();
+                }, 300);
+            }, 800);
+        }
+
+        async function endGame() {
+            clearInterval(timerInterval);
+            userJustPlayed = true;
+            quizScreen.classList.remove('active');
+            resultScreen.classList.add('active');
+
+            document.getElementById('score-text').innerText = `${score} / ${currentQuestions.length}`;
+            document.getElementById('time-text').innerText = `Уақыт: ${timerEl.innerText}`;
+            document.getElementById('reviewBtn').style.display = mistakes.length > 0 ? 'inline-block' : 'none';
+
+            document.getElementById('save-status').innerText = "Нәтиже өңделуде...";
+            await submitResult();
+        }
+
+        // Отправляем результат на Go бэкенд.
+        // Сервер проверяет ответы, считает очки, начисляет монеты, обновляет лидерборд.
+        async function submitResult() {
+            try {
+                const response = await apiFetch('/api/v1/quiz/submit', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        answers: userAnswers,          // [{question_id, chosen}, ...]
+                        total_time_ms: elapsedMilliseconds
+                    })
+                });
+
+                const data = await response.json();
+                // Сервер возвращает: { score, total, coins_earned, rank_message, new_balance }
+
+                // Обновляем счёт из ответа сервера (источник правды)
+                document.getElementById('score-text').innerText = `${data.score} / ${data.total}`;
+
+                document.getElementById('coin-display').innerHTML =
+                    `+${data.coins_earned} 🪙` +
+                    (data.rank_message
+                        ? `<br><span style="font-size:1rem; color: var(--success);">${data.rank_message}</span>`
+                        : '');
+                document.getElementById('save-status').innerText = "Нәтиже сәтті сақталды!";
+
+            } catch (error) {
+                console.error("Сақтау қатесі:", error);
+                document.getElementById('save-status').innerText = "Сақтау кезінде қате кетті.";
+                document.getElementById('save-status').style.color = "var(--danger)";
+            }
+        }
+
+        async function getLeaderboardData() {
+            const response = await apiFetch('/api/v1/leaderboard?limit=10');
+            const data = await response.json();
+            // Сервер возвращает уже отсортированный массив:
+            // [{ name, avatar_url, score, time_ms }, ...]
+            return data;
+        }
+
+        async function showLeaderboard(fromResultScreen) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            leaderboardScreen.classList.add('active');
+            
+            const table = document.getElementById('leaderboard-table');
+            table.innerHTML = "";
+            document.getElementById('loading-text').style.display = 'block';
+
+            try {
+                const data = await getLeaderboardData();
+                document.getElementById('loading-text').style.display = 'none';
+
+                table.innerHTML = `<tr><th>Орын</th><th>Ойыншы</th><th>Ұпай</th><th>Уақыт</th></tr>`;
+                
+                data.slice(0, 10).forEach((user, index) => {
+                    const tr = document.createElement('tr');
+                    
+                    if (index === 0) tr.className = 'rank-1';
+                    else if (index === 1) tr.className = 'rank-2';
+                    else if (index === 2) tr.className = 'rank-3';
+
+                    let rankText = (index + 1) + " 💥";
+                    if(index === 0) rankText = "🥇 1";
+                    if(index === 1) rankText = "🥈 2";
+                    if(index === 2) rankText = "🥉 3";
+
+                    let avatarUrl = user.avatar_url || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+
+                    tr.innerHTML = `
+                        <td style="font-size:1.2rem; font-weight:bold;">${rankText}</td>
+                        <td class="player-info-cell">
+                            <img src="${avatarUrl}" class="player-avatar" alt="avatar">
+                            <span class="player-name">${user.name}</span>
+                        </td>
+                        <td style="color:var(--accent-gold); font-weight:bold;">${user.score}/20</td>
+                        <td style="font-family:monospace;">${formatTime(user.time_ms)}</td>
+                    `;
+                    table.appendChild(tr);
+                });
+            } catch (error) {
+                console.error("Лидерборд қатесі:", error);
+                document.getElementById('loading-text').innerText = "Деректерді жүктеу кезінде қате кетті.";
+                document.getElementById('loading-text').style.color = "var(--danger)";
+            }
+        }
+
+        function showReview() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            reviewScreen.classList.add('active');
+
+            const box = document.getElementById('review-box');
+            box.innerHTML = "";
+
+            mistakes.forEach((m, index) => {
+                box.innerHTML += `
+                    <div class="mistake-item">
+                        <div class="mistake-q">${index + 1}. ${m.q}</div>
+                        <div class="mistake-wrong">❌ Сенің жауабың: ${m.wrong}</div>
+                        <div class="mistake-right">✅ Дұрыс жауап: ${m.right}</div>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>

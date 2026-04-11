@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль | Shadow of the Steppe</title>
+
+    <script src="utils.js"></script>
+    <script>requireAuth();</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --accent-gold: #D4AF37;
+            --accent-glow: rgba(212, 175, 55, 0.4);
+            --bg-base: #0a0f16;
+            --glass-bg: rgba(20, 25, 35, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            
+            /* Цвета статусов */
+            --danger: #ef4444;
+            --success: #10b981;
+
+            /* Түстер (Редкость) */
+            --rarity-common: #94a3b8;    /* Обычная - Серая */
+            --rarity-rare: #10b981;      /* Редкая - Зеленая */
+            --rarity-epic: #a855f7;      /* Эпик - Фиолетовая */
+            --rarity-legendary: #D4AF37; /* Лега - Желтая/Золотая */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(212, 175, 55, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(30, 58, 138, 0.1), transparent 25%);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            animation: fadeInPage 0.8s ease-out;
+        }
+
+        @keyframes fadeInPage {
+            from { opacity: 0; filter: blur(10px); }
+            to { opacity: 1; filter: blur(0); }
+        }
+
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+        }
+
+        /* --- Сайдбар --- */
+        .sidebar {
+            width: 90px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 0;
+            justify-content: space-between;
+            z-index: 50;
+            border-right: 1px solid var(--glass-border);
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .nav-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            opacity: 0.6;
+        }
+
+        .nav-btn img {
+            width: 24px;
+            height: 24px;
+            filter: invert(1);
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .profile-avatar-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-gold);
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .profile-avatar-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        /* --- Основной контент --- */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 40px 60px;
+            position: relative;
+        }
+
+        .main-content::-webkit-scrollbar { width: 6px; }
+        .main-content::-webkit-scrollbar-track { background: transparent; }
+        .main-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+
+        /* --- Шапка --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.6s ease-out;
+            width: 100%;
+        }
+
+        @keyframes fadeInDown { 
+            from { opacity: 0; transform: translateY(-20px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        .header-title {
+            font-family: 'Cinzel', serif;
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+        }
+
+        .user-stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            border-radius: 100px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-badge:hover {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .stat-badge img {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* --- Контейнер Профиля --- */
+        .profile-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .profile-container {
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            width: 900px;
+            max-width: 100%;
+            display: flex;
+            gap: 50px;
+            animation: slideUpFade 0.6s backwards;
+        }
+
+        /* Сол жақ - Ақпарат */
+        .profile-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-right: 1px solid var(--glass-border);
+            padding-right: 40px;
+            justify-content: center;
+        }
+
+        .profile-info h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 32px;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+            margin-bottom: 40px;
+        }
+
+        .current-avatar {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #1e293b;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            transition: all 0.4s ease;
+            border: 3px solid transparent; 
+        }
+
+        .input-group {
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-muted);
+            outline: none;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: not-allowed; 
+        }
+
+        .btn-save {
+            background: var(--accent-gold);
+            color: #000;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            width: 100%;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px var(--accent-glow);
+        }
+
+        .btn-save:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--accent-glow);
+        }
+
+        .btn-save:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* Оң жақ - Аватарлар */
+        .avatar-selection {
+            flex: 1.5;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .avatar-selection h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+
+        .avatars-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            background: rgba(0,0,0,0.2);
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .avatar-item {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideUpFade 0.5s forwards;
+            transition: all 0.3s ease;
+        }
+
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            object-fit: cover;
+            transition: all 0.3s ease;
+            background-color: #1e293b; 
+        }
+
+        /* Редкость түстері (Border) */
+        .rarity-common .avatar-img { border-color: var(--rarity-common); }
+        .rarity-rare .avatar-img { border-color: var(--rarity-rare); }
+        .rarity-epic .avatar-img { border-color: var(--rarity-epic); }
+        .rarity-legendary .avatar-img { border-color: var(--rarity-legendary); }
+
+        .avatar-item:hover:not(.locked) { transform: scale(1.1); z-index: 10; }
+        
+        .avatar-item.active {
+            transform: scale(1.15);
+            z-index: 5;
+        }
+
+        /* Свечение у активного */
+        .avatar-item.active.rarity-common .avatar-img { box-shadow: 0 0 15px var(--rarity-common); }
+        .avatar-item.active.rarity-rare .avatar-img { box-shadow: 0 0 15px var(--rarity-rare); }
+        .avatar-item.active.rarity-epic .avatar-img { box-shadow: 0 0 15px var(--rarity-epic); }
+        .avatar-item.active.rarity-legendary .avatar-img { box-shadow: 0 0 20px var(--rarity-legendary); }
+
+        /* Жабық аватар стилі */
+        .locked .avatar-img {
+            filter: brightness(0.35); 
+            cursor: not-allowed;
+        }
+
+        .lock-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            opacity: 0.8;
+            pointer-events: none;
+            filter: invert(1);
+        }
+
+        /* Лоадер на весь блок */
+        .loading-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg-base);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar glass">
+        <div class="nav-items">
+            <a href="profile.html" style="display: block; line-height: 0;">
+                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="profile-avatar-btn" id="sidebarAvatarDisplay" title="Профиль" alt="Аватар">
+            </a>
+        </div>
+        
+        <div class="nav-items">
+            <a href="main.html" class="nav-btn" title="Басты бет"><img src="https://cdn-icons-png.flaticon.com/512/1946/1946436.png" alt="Home"></a>
+            <a href="shop.html" class="nav-btn" title="Дүкен"><img src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png" alt="Shop"></a>
+            <a href="leaderboard.html" class="nav-btn" title="Рейтинг"><img src="https://cdn-icons-png.flaticon.com/512/3112/3112946.png" alt="Leaderboard"></a>
+        </div>
+
+        <div class="nav-items">
+            <a href="#" class="nav-btn" title="Баптаулар"><img src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png" alt="Settings"></a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div id="loadingOverlay" class="loading-overlay">
+            <h2>Деректер жүктелуде...</h2>
+        </div>
+
+        <header class="header">
+            <h1 class="header-title">Shadow of the Steppe</h1>
+            
+            <div class="user-stats">
+                <div class="stat-badge glass" id="balance-container">
+                    <img src="https://cdn-icons-png.flaticon.com/512/272/272525.png" alt="Coin">
+                    <span id="user-balance">--</span> ТГ
+                </div>
+            </div>
+        </header>
+
+        <div class="profile-wrapper">
+            <div class="profile-container glass">
+                
+                <div class="profile-info">
+                    <h2>Жауынгер</h2>
+                    
+                    <div class="avatar-wrapper">
+                        <img src="" id="mainAvatarDisplay" class="current-avatar" alt="Avatar">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Никнейм</label>
+                        <input type="text" id="usernameInput" value="..." readonly>
+                    </div>
+
+                    <button class="btn-save" id="saveBtn" onclick="saveAvatar()">Аватарды сақтау</button>
+                </div>
+
+                <div class="avatar-selection">
+                    <h3>Коллекция (<span id="avatarCount">0</span> Аватар)</h3>
+                    <div class="avatars-grid" id="avatarsGrid"></div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let userProfile = null;
+        let inventory = [];
+        let currentSelectedId = null;
+
+        async function fetchUserData() {
+            try {
+                const [profileRes, inventoryRes] = await Promise.all([
+                    apiFetch('/api/v1/profile'),
+                    apiFetch('/api/v1/inventory')
+                ]);
+                userProfile = await profileRes.json();
+                inventory   = await inventoryRes.json();
+                currentSelectedId = userProfile.avatar || 'common_1';
+                updateUI();
+                renderAvatars();
+                const overlay = document.getElementById('loadingOverlay');
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.style.display = 'none', 300);
+            } catch (error) {
+                console.error('Профиль жүктеу қатесі:', error);
+                document.getElementById('loadingOverlay').innerHTML =
+                    '<h2 style="color:var(--danger);">Деректерді жүктеу қатесі</h2>' +
+                    '<p style="color:var(--text-muted);margin-top:10px;">Бетті жаңартып көріңіз</p>';
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('usernameInput').value = userProfile.username;
+            document.getElementById('avatarCount').innerText = inventory.filter(a => a.is_unlocked).length;
+            animateValue('user-balance', 0, userProfile.coins, 1000);
+        }
+
+        function getRarityColor(rarity) {
+            const colors = { common:'#94a3b8', rare:'#10b981', epic:'#a855f7', legendary:'#D4AF37' };
+            return colors[rarity] || colors.common;
+        }
+
+        function renderAvatars() {
+            const grid = document.getElementById('avatarsGrid');
+            grid.innerHTML = '';
+            const currentAvatar = inventory.find(a => a.id === currentSelectedId)
+                               || inventory.find(a => a.is_unlocked)
+                               || inventory[0];
+            if (!currentAvatar) return;
+
+            const mainImg = document.getElementById('mainAvatarDisplay');
+            mainImg.src = currentAvatar.url;
+            const rarityColor = getRarityColor(currentAvatar.rarity);
+            mainImg.style.borderColor = rarityColor;
+            mainImg.style.boxShadow = '0 0 30px ' + rarityColor + '80';
+
+            const sidebarImg = document.getElementById('sidebarAvatarDisplay');
+            sidebarImg.src = currentAvatar.url;
+            sidebarImg.style.borderColor = rarityColor;
+
+            inventory.forEach((avatar, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'avatar-item rarity-' + avatar.rarity;
+                wrapper.style.animationDelay = (index * 0.05) + 's';
+                const img = document.createElement('img');
+                img.src = avatar.url;
+                img.className = 'avatar-img';
+                if (avatar.id === currentSelectedId) wrapper.classList.add('active');
+
+                // Fix #10: сначала img, потом lockIcon — иначе замок перекрывается аватаркой
+                wrapper.appendChild(img);
+
+                if (!avatar.is_unlocked) {
+                    wrapper.classList.add('locked');
+                    wrapper.onclick = () => alert('Бұл аватар жабық! Дүкеннен ашыңыз.');
+                    const lockIcon = document.createElement('img');
+                    lockIcon.src = 'https://cdn-icons-png.flaticon.com/512/3064/3064155.png';
+                    lockIcon.className = 'lock-icon';
+                    wrapper.appendChild(lockIcon); // поверх img
+                } else {
+                    wrapper.onclick = () => selectAvatar(avatar.id);
+                }
+
+                grid.appendChild(wrapper);
+            });
+        }
+
+        function selectAvatar(id) {
+            currentSelectedId = id;
+            renderAvatars();
+        }
+
+        async function saveAvatar() {
+            const btn = document.getElementById('saveBtn');
+            if (currentSelectedId === userProfile.avatar) return;
+            btn.innerText = 'Сақталуда...';
+            btn.disabled = true;
+            try {
+                await apiFetch('/api/v1/profile/avatar', {
+                    method: 'POST',
+                    body: JSON.stringify({ avatar_id: currentSelectedId })
+                });
+                userProfile.avatar = currentSelectedId;
+                btn.innerText = 'Сақталды ✓';
+                btn.style.background = 'var(--success)';
+                btn.style.color = '#fff';
+            } catch (error) {
+                console.error('Аватар сақтау қатесі:', error);
+                btn.innerText = 'Қате шықты!';
+                btn.style.background = 'var(--danger)';
+                btn.style.color = '#fff';
+                currentSelectedId = userProfile.avatar;
+                renderAvatars();
+            } finally {
+                setTimeout(() => {
+                    btn.innerText = 'Аватарды сақтау';
+                    btn.style.background = 'var(--accent-gold)';
+                    btn.style.color = '#000';
+                    btn.disabled = false;
+                }, 2000);
+            }
+        }
+
+        window.onload = fetchUserData;
+    </script>
+</body>
+</html>
