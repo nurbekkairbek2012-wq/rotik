@@ -515,17 +515,18 @@ func main() {
 	initDB()
 	r := gin.Default()
 
-	// --- ИСПРАВЛЕННЫЙ БЛОК ---
+	// 1. Вместо Static("/", "./") используем StaticFile для конкретных страниц
+    r.StaticFile("/", "./login.html")      // Главная страница теперь сразу login.html
+    r.StaticFile("/login", "./login.html") 
+    r.StaticFile("/index.html", "./login.html")
 
-    // Используем "r", так как выше ты объявил именно "r"
-    r.Static("/", "./")
-
-    r.GET("/", func(c *gin.Context) {
-        c.File("login.html")
-    })
-
-    // --- КОНЕЦ БЛОКА ---
-
+    // 2. Раздаем JS-файлы отдельно, чтобы не было конфликта
+    // Если у тебя JS файлы лежат прямо в корне, можно сделать так:
+    r.StaticFile("/auth.js", "./auth.js")
+    r.StaticFile("/utils.js", "./utils.js")
+    // Если есть картинки или CSS в папках:
+    // r.Static("/assets", "./assets")
+	
 	r.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
