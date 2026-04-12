@@ -94,21 +94,16 @@ document.addEventListener('DOMContentLoaded', initPageTransitions);
 const DEFAULT_AVATAR_URL = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
 
 const AVATAR_URLS = {
-    'common_1':    'https://cdn-icons-png.flaticon.com/512/149/149071.png',
-    'common_2':    'https://cdn-icons-png.flaticon.com/512/4140/4140048.png',
-    'common_3':    'https://cdn-icons-png.flaticon.com/512/4140/4140051.png',
-    'common_4':    'https://cdn-icons-png.flaticon.com/512/4140/4140060.png',
-    'common_5':    'https://cdn-icons-png.flaticon.com/512/4140/4140051.png',
-    'rare_1':      'https://cdn-icons-png.flaticon.com/512/4140/4140060.png',
-    'rare_2':      'https://cdn-icons-png.flaticon.com/512/4140/4140047.png',
-    'rare_3':      'https://cdn-icons-png.flaticon.com/512/4140/4140061.png',
-    'rare_4':      'https://cdn-icons-png.flaticon.com/512/4140/4140061.png',
-    'epic_1':      'https://cdn-icons-png.flaticon.com/512/4140/4140077.png',
-    'epic_2':      'https://cdn-icons-png.flaticon.com/512/4140/4140085.png',
-    'epic_3':      'https://cdn-icons-png.flaticon.com/512/4140/4140085.png',
-    'legendary_1': 'https://cdn-icons-png.flaticon.com/512/4140/4140037.png',
-    'legendary_2': 'https://cdn-icons-png.flaticon.com/512/4140/4140100.png',
-    'legendary_3': 'https://cdn-icons-png.flaticon.com/512/4140/4140037.png',
+    'common_1':    'ава1.png',
+    'common_2':    '3a18b683-5363-4267-a890-59cc2f5f6d87.jpeg',
+    'common_3':    'ава3.jpeg',
+    'rare_1':      'a7d505b9-5b86-4057-8b87-9348b5983ddb.jpeg',
+    'rare_2':      'ава5.jpeg',
+    'rare_3':      'ава6.jpeg',
+    'epic_1':      'ава 7.jpeg',
+    'epic_2':      'ава8.jpeg',
+    'legendary_1': 'ава9.jpeg',
+    'legendary_3': 'ава10.jpeg',
 };
 
 function resolveAvatarUrl(avatarId) {
@@ -151,17 +146,12 @@ const AVATAR_NAMES = {
     'common_1':    'Дала Жауынгері',
     'common_2':    'Күзетші',
     'common_3':    'Садақшы',
-    'common_4':    'Жаяу Сарбаз',
-    'common_5':    'Жас Батыр',
     'rare_1':      'Сарбаз Басшы',
     'rare_2':      'Ат Жауынгер',
     'rare_3':      'Найзагер',
-    'rare_4':      'Дала Барысы',
     'epic_1':      'Хан Нөкері',
     'epic_2':      'Темір Қалқан',
-    'epic_3':      'Жеңілмес Ер',
     'legendary_1': 'Кенесары Хан',
-    'legendary_2': 'Аруана Ханым',
     'legendary_3': 'Наурызбай Батыр',
 };
 
