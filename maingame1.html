@@ -276,7 +276,7 @@
     <nav class="sidebar glass">
         <div class="nav-items">
             <a href="profile.html" style="display: block; line-height: 0;">
-                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="profile-avatar" title="Профиль" alt="Аватар">
+                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" id="sidebarAvatar" class="profile-avatar" title="Профиль" alt="Аватар">
             </a>
         </div>
         <div class="nav-items">
@@ -285,7 +285,7 @@
             <a href="leaderboard.html" class="nav-btn" title="Рейтинг"><img src="https://cdn-icons-png.flaticon.com/512/3112/3112946.png" alt="Leaderboard"></a>
         </div>
         <div class="nav-items">
-            <a href="settings.html" class="nav-btn" title="Баптаулар"><img src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png" alt="Settings"></a>
+            <a href="#" class="nav-btn" title="Баптаулар"><img src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png" alt="Settings"></a>
         </div>
     </nav>
 
@@ -354,13 +354,14 @@
     </main>
 
     <script>
+        document.addEventListener('DOMContentLoaded', loadSidebarAvatar);
+
         function startQuizSession() {
             // Эффект плавного перехода к самой игре
             document.body.style.transition = 'opacity 0.5s ease';
             document.body.style.opacity = '0';
             
             setTimeout(() => {
-                // Здесь укажешь ссылку на файл с самой логикой игры (например quiz.html)
                 console.log("Запуск генерации 20 вопросов...");
                  window.location.href = 'maingame2.html'; 
             }, 500);

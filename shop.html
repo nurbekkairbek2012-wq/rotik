@@ -867,7 +867,7 @@
         <div class="nav-items">
             <a href="profile.html" style="display: block; line-height: 0;">
                 <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="profile-avatar-btn"
-                    title="Профиль" alt="Аватар">
+                    id="sidebarAvatar" title="Профиль" alt="Аватар">
             </a>
         </div>
         <div class="nav-items">
@@ -879,7 +879,7 @@
                     src="https://cdn-icons-png.flaticon.com/512/3112/3112946.png" alt="Leaderboard"></a>
         </div>
         <div class="nav-items">
-            <a href="settings.html" class="nav-btn" title="Баптаулар"><img
+            <a href="#" class="nav-btn" title="Баптаулар"><img
                     src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png" alt="Settings"></a>
         </div>
     </nav>
@@ -1082,7 +1082,10 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', loadBalance);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadBalance();
+            loadSidebarAvatar();
+        });
 
         function animateValue(id, start, end, duration) {
             let range = end - start; let current = start;

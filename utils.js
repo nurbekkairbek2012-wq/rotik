@@ -124,4 +124,19 @@ function initPageTransitions() {
 }
  
 document.addEventListener('DOMContentLoaded', initPageTransitions);
- 
+
+
+// ------ 8. АВАТАРКА В САЙДБАРЕ (используется на всех страницах) ----
+//  Вызывать после DOMContentLoaded на каждой защищённой странице.
+//  Находит первый элемент с id="sidebarAvatar" и проставляет src из API.
+async function loadSidebarAvatar() {
+    const img = document.getElementById('sidebarAvatar');
+    if (!img) return;
+    try {
+        const res = await apiFetch('/api/v1/profile');
+        const data = await res.json();
+        if (data.avatar_url) {
+            img.src = data.avatar_url;
+        }
+    } catch (_) { /* молчим — дефолтная картинка уже стоит */ }
+}

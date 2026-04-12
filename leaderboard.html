@@ -224,7 +224,7 @@
     <nav class="sidebar glass">
         <div class="nav-items">
             <a href="profile.html">
-                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="profile-avatar-btn" alt="Avatar">
+                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" id="sidebarAvatar" class="profile-avatar-btn" alt="Avatar">
             </a>
         </div>
         
@@ -263,6 +263,8 @@
     </main>
 
     <script>
+        document.addEventListener('DOMContentLoaded', loadSidebarAvatar);
+
         // Плавный переход между страницами
         document.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', function(e) {

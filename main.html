@@ -349,6 +349,7 @@
     <div class="nav-items">
         <a href="profile.html" style="display: block; line-height: 0;">
             <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" 
+                 id="sidebarAvatar"
                  class="profile-avatar" 
                  title="Профиль" 
                  alt="Аватар">
@@ -430,6 +431,7 @@
         // Fix #5: реальный API вместо мок-данных, используем animateValue из utils.js
         document.addEventListener('DOMContentLoaded', () => {
             fetchUserData();
+            loadSidebarAvatar();
         });
 
         async function fetchUserData() {

@@ -297,6 +297,9 @@ func Register(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Имя пользователя уже занято"})
 		return
 	}
+	// Сразу выдаём дефолтную аватарку в инвентарь
+	db.Create(&Inventory{UserID: user.ID, AvatarID: "common_1"})
+
 	token, err := generateToken(user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка генерации токена"})
@@ -341,7 +344,24 @@ func GetProfile(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Пользователь не найден"})
 		return
 	}
-	c.JSON(http.StatusOK, user)
+	// Ищем URL аватарки по avatar_id — фронтенд не должен знать маппинг
+	avatarURL := "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+	for _, a := range allAvatars {
+		if a.ID == user.Avatar {
+			avatarURL = a.URL
+			break
+		}
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"id":         user.ID,
+		"username":   user.Username,
+		"score":      user.Score,
+		"time_ms":    user.TimeMs,
+		"coins":      user.Coins,
+		"avatar":     user.Avatar,
+		"avatar_url": avatarURL,
+		"created_at": user.CreatedAt,
+	})
 }
 
 // ============================================================
