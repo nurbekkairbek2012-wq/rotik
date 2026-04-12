@@ -117,6 +117,36 @@ function resolveAvatarUrl(avatarId) {
 }
 
 // ------ 9. АВАТАРКА В САЙДБАРЕ ----------------------------
+
+// Редкость по ID аватарки
+function getAvatarRarity(avatarId) {
+    if (!avatarId) return 'common';
+    if (avatarId.startsWith('legendary')) return 'legendary';
+    if (avatarId.startsWith('epic'))      return 'epic';
+    if (avatarId.startsWith('rare'))      return 'rare';
+    return 'common';
+}
+
+// Цвет подсветки по редкости
+function getRarityGlowColor(rarity) {
+    const map = {
+        common:    '#94a3b8',
+        rare:      '#3b82f6',   // синий
+        epic:      '#a855f7',   // фиолетовый
+        legendary: '#D4AF37',   // золотой
+    };
+    return map[rarity] || map.common;
+}
+
+// Применить rarity-стиль к img-элементу аватарки
+function applyRarityGlow(imgEl, avatarId) {
+    if (!imgEl) return;
+    const rarity = getAvatarRarity(avatarId);
+    const color  = getRarityGlowColor(rarity);
+    imgEl.style.borderColor = color;
+    imgEl.style.boxShadow   = `0 0 12px ${color}CC, 0 0 24px ${color}66`;
+}
+
 async function loadSidebarAvatar() {
     const imgs = [
         document.getElementById('sidebarAvatar'),
@@ -125,7 +155,13 @@ async function loadSidebarAvatar() {
     if (imgs.length === 0) return;
 
     const cachedUrl = localStorage.getItem('cachedAvatarUrl');
-    if (cachedUrl) imgs.forEach(img => { img.src = cachedUrl; });
+    const cachedId  = localStorage.getItem('cachedAvatarId');
+    if (cachedUrl) {
+        imgs.forEach(img => {
+            img.src = cachedUrl;
+            applyRarityGlow(img, cachedId);
+        });
+    }
 
     try {
         const res = await apiFetch('/api/v1/profile');
@@ -137,7 +173,10 @@ async function loadSidebarAvatar() {
         }
         if (!url) url = DEFAULT_AVATAR_URL;
 
-        imgs.forEach(img => { img.src = url; });
+        imgs.forEach(img => {
+            img.src = url;
+            applyRarityGlow(img, data.avatar);
+        });
         localStorage.setItem('cachedAvatarUrl', url);
         if (data.avatar) localStorage.setItem('cachedAvatarId', data.avatar);
     } catch (_) { /* используем кеш */ }

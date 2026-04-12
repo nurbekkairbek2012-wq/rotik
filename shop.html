@@ -28,8 +28,8 @@
             /* Сиректік түстері (Редкость) */
             --rarity-common: #94a3b8;
             /* Обычная - Сұр */
-            --rarity-rare: #10b981;
-            /* Редкая - Жасыл */
+            --rarity-rare: #3b82f6;
+            /* Редкая - Көк (Синяя) */
             --rarity-epic: #a855f7;
             /* Эпик - Күлгін */
             --rarity-legendary: #D4AF37;
@@ -1512,6 +1512,14 @@
             }, 2500);
         }
 
+        // Компенсация за повторную аватарку (монеты)
+        const DUPLICATE_COMPENSATION = {
+            'common':    150,
+            'rare':      500,
+            'epic':      1500,
+            'legendary': 5000
+        };
+
         function showModal(rarity, avatarUrl, isNew, avatarId) {
             const modal = document.getElementById('rewardModal');
             const img = document.getElementById('rewardImg');
@@ -1521,9 +1529,9 @@
             const badgeNew = modal.querySelector('.badge-new');
 
             const rarities = {
-                "common": { text: "ҚАРАПАЙЫМ АВАТАР", color: "#94a3b8" },
-                "rare": { text: "СИРЕК АВАТАР", color: "#10b981" },
-                "epic": { text: "ЭПИКАЛЫҚ АВАТАР", color: "#a855f7" },
+                "common":    { text: "ҚАРАПАЙЫМ АВАТАР",  color: "#94a3b8" },
+                "rare":      { text: "СИРЕК АВАТАР",       color: "#3b82f6" },
+                "epic":      { text: "ЭПИКАЛЫҚ АВАТАР",    color: "#a855f7" },
                 "legendary": { text: "ЛЕГЕНДАРЛЫ АВАТАР!", color: "#D4AF37" }
             };
 
@@ -1533,17 +1541,55 @@
             img.style.borderColor = avatarInfo.color;
             img.style.boxShadow = `0 0 50px ${avatarInfo.color}80`;
 
-            rarityText.innerText = avatarInfo.text;
-            rarityText.style.color = avatarInfo.color;
-            rarityText.style.textShadow = `0 0 20px ${avatarInfo.color}80`;
-
+            // Показываем имя аватарки
             if (nameText) {
                 const name = (typeof getAvatarName === 'function') ? getAvatarName(avatarId) : '';
                 nameText.innerText = name;
                 nameText.style.color = avatarInfo.color;
             }
 
-            if (badgeNew) badgeNew.style.display = isNew ? 'block' : 'none';
+            // --- Дублікат логикасы ---
+            let dupBadge = modal.querySelector('.badge-duplicate');
+            if (!dupBadge) {
+                dupBadge = document.createElement('div');
+                dupBadge.className = 'badge-duplicate';
+                // Вставить после badge-new
+                badgeNew.parentNode.insertBefore(dupBadge, badgeNew.nextSibling);
+            }
+
+            if (!isNew) {
+                // Повторная — показываем компенсацию
+                const coins = DUPLICATE_COMPENSATION[rarity] || 150;
+                rarityText.innerText = avatarInfo.text + ' — ҚАЙТАЛАМА';
+                dupBadge.style.display = 'block';
+                dupBadge.innerHTML = `+${coins.toLocaleString('ru-RU')} ТГ өтемақы`;
+                dupBadge.style.cssText = `
+                    display: block;
+                    margin: 8px auto 0;
+                    padding: 6px 20px;
+                    background: rgba(212,175,55,0.15);
+                    border: 1px solid #D4AF37;
+                    border-radius: 100px;
+                    color: #D4AF37;
+                    font-size: 16px;
+                    font-weight: 800;
+                    letter-spacing: 1px;
+                    text-align: center;
+                    width: fit-content;
+                `;
+                if (badgeNew) badgeNew.style.display = 'none';
+                // Анимация монет через небольшую задержку (когда модалка открылась)
+                setTimeout(() => {
+                    spawnCoinsAnimation(img, coins);
+                }, 500);
+            } else {
+                rarityText.innerText = avatarInfo.text;
+                dupBadge.style.display = 'none';
+                if (badgeNew) badgeNew.style.display = 'block';
+            }
+
+            rarityText.style.color = avatarInfo.color;
+            rarityText.style.textShadow = `0 0 20px ${avatarInfo.color}80`;
 
             rays.style.background = `conic-gradient(from 0deg, transparent 0deg, ${avatarInfo.color}40 20deg, transparent 40deg, ${avatarInfo.color}40 60deg, transparent 80deg, ${avatarInfo.color}40 100deg, transparent 120deg, ${avatarInfo.color}40 140deg, transparent 160deg, ${avatarInfo.color}40 180deg, transparent 200deg, ${avatarInfo.color}40 220deg, transparent 240deg, ${avatarInfo.color}40 260deg, transparent 280deg, ${avatarInfo.color}40 300deg, transparent 320deg, ${avatarInfo.color}40 340deg, transparent 360deg)`;
 
