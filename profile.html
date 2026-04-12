@@ -558,7 +558,7 @@
             if (!currentAvatar) return;
 
             const mainImg = document.getElementById('mainAvatarDisplay');
-            mainImg.src = currentAvatar.url;
+            mainImg.src = resolveAvatarUrl(currentAvatar.id);
             const rarityColor = getRarityColor(currentAvatar.rarity);
             mainImg.style.borderColor = rarityColor;
             mainImg.style.boxShadow = '0 0 30px ' + rarityColor + '80';
@@ -572,7 +572,7 @@
 
             const sidebarImg = document.getElementById('sidebarAvatarDisplay');
             if (sidebarImg) {
-                sidebarImg.src = currentAvatar.url;
+                sidebarImg.src = resolveAvatarUrl(currentAvatar.id);
                 sidebarImg.style.borderColor = rarityColor;
             }
 
@@ -586,7 +586,7 @@
                 imgContainer.style.cssText = 'position:relative;width:100%;aspect-ratio:1;';
 
                 const img = document.createElement('img');
-                img.src = avatar.url;
+                img.src = resolveAvatarUrl(avatar.id);
                 img.className = 'avatar-img';
                 if (avatar.id === currentSelectedId) wrapper.classList.add('active');
 
