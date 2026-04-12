@@ -993,6 +993,80 @@
             .bonus-row { grid-template-columns: 1fr; }
         }
     </style>
+        .bonus-visual {
+            flex-shrink: 0;
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .daily-visual {
+            background: linear-gradient(135deg, rgba(212,175,55,0.15) 0%, rgba(184,134,11,0.25) 100%);
+            border: 1px solid rgba(212,175,55,0.3);
+            box-shadow: 0 0 20px rgba(212,175,55,0.15);
+            animation: giftPulse 3s ease-in-out infinite;
+        }
+
+        .promo-visual {
+            background: linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(139,92,246,0.25) 100%);
+            border: 1px solid rgba(168,85,247,0.3);
+            box-shadow: 0 0 20px rgba(168,85,247,0.15);
+            animation: promoPulse 3s ease-in-out infinite;
+        }
+
+        .bonus-visual svg {
+            width: 56px;
+            height: 56px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+        }
+
+        .daily-visual svg {
+            animation: giftFloat 4s ease-in-out infinite;
+        }
+
+        .promo-visual svg {
+            animation: promoSpin 8s linear infinite;
+        }
+
+        @keyframes giftFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-5px) rotate(3deg); }
+        }
+
+        @keyframes promoSpin {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(5deg); }
+            75% { transform: rotate(-5deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        @keyframes giftPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(212,175,55,0.15); }
+            50% { box-shadow: 0 0 35px rgba(212,175,55,0.35); }
+        }
+
+        @keyframes promoPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(168,85,247,0.15); }
+            50% { box-shadow: 0 0 35px rgba(168,85,247,0.35); }
+        }
+
+        /* Имя аватара в модалке */
+        .reward-avatar-name {
+            font-family: 'Cinzel', serif;
+            font-size: 22px;
+            color: #fff;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            opacity: 0.9;
+        }
 </head>
 
 <body>
@@ -1000,7 +1074,7 @@
     <nav class="sidebar glass">
         <div class="nav-items">
             <a href="profile.html" style="display: block; line-height: 0;">
-                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="profile-avatar-btn"
+                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" id="sidebarAvatar" class="profile-avatar-btn"
                     title="Профиль" alt="Аватар">
             </a>
         </div>
@@ -1174,6 +1248,82 @@
                 </div>
 
             </div>
+
+            <!-- ===== БОНУС СЕКЦИЯСЫ: Сыйлық + Промокод ===== -->
+            <div class="bonus-row">
+
+                <!-- Күнделікті Сыйлық -->
+                <div class="bonus-card glass">
+                    <div class="bonus-visual daily-visual">
+                        <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Gift box body -->
+                            <rect x="12" y="36" width="56" height="36" rx="6" fill="#D4AF37" opacity="0.9"/>
+                            <!-- Gift box lid -->
+                            <rect x="8" y="26" width="64" height="14" rx="5" fill="#B8860B"/>
+                            <!-- Ribbon vertical -->
+                            <rect x="36" y="26" width="8" height="46" rx="3" fill="#fff" opacity="0.85"/>
+                            <!-- Ribbon horizontal -->
+                            <rect x="8" y="30" width="64" height="8" rx="3" fill="#fff" opacity="0.85"/>
+                            <!-- Bow left loop -->
+                            <ellipse cx="28" cy="22" rx="12" ry="7" fill="#fff" opacity="0.9" transform="rotate(-20 28 22)"/>
+                            <!-- Bow right loop -->
+                            <ellipse cx="52" cy="22" rx="12" ry="7" fill="#fff" opacity="0.9" transform="rotate(20 52 22)"/>
+                            <!-- Bow center -->
+                            <circle cx="40" cy="24" r="6" fill="#D4AF37"/>
+                            <!-- Star sparkles -->
+                            <circle cx="16" cy="14" r="2.5" fill="#FFD700" opacity="0.8"/>
+                            <circle cx="64" cy="10" r="2" fill="#FFD700" opacity="0.7"/>
+                            <circle cx="70" cy="20" r="1.5" fill="#FFD700" opacity="0.6"/>
+                            <circle cx="10" cy="22" r="1.5" fill="#FFD700" opacity="0.6"/>
+                        </svg>
+                    </div>
+                    <div class="bonus-info">
+                        <div class="bonus-title">Күнделікті Сыйлық</div>
+                        <div class="bonus-desc">Күн сайын 150 монета алыңыз! Жіберіп алмаңыз.</div>
+                        <div class="bonus-timer" id="dailyTimer">Жүктелуде...</div>
+                    </div>
+                    <button class="bonus-btn" id="dailyBtn" onclick="claimDaily()" disabled>
+                        <img src="https://cdn-icons-png.flaticon.com/512/272/272525.png" alt="coin" style="width:18px;height:18px;"> 150
+                    </button>
+                </div>
+
+                <!-- Промокод -->
+                <div class="bonus-card glass">
+                    <div class="bonus-visual promo-visual">
+                        <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Ticket body -->
+                            <path d="M8 28 Q8 20 16 20 L64 20 Q72 20 72 28 L72 36 Q66 36 66 40 Q66 44 72 44 L72 52 Q72 60 64 60 L16 60 Q8 60 8 52 L8 44 Q14 44 14 40 Q14 36 8 36 Z" fill="#a855f7" opacity="0.85"/>
+                            <!-- Perforation dots -->
+                            <circle cx="14" cy="30" r="1.5" fill="#0a0f16" opacity="0.5"/>
+                            <circle cx="14" cy="35" r="1.5" fill="#0a0f16" opacity="0.5"/>
+                            <circle cx="14" cy="45" r="1.5" fill="#0a0f16" opacity="0.5"/>
+                            <circle cx="14" cy="50" r="1.5" fill="#0a0f16" opacity="0.5"/>
+                            <!-- Text lines -->
+                            <rect x="24" y="30" width="36" height="4" rx="2" fill="#fff" opacity="0.9"/>
+                            <rect x="24" y="38" width="28" height="3" rx="1.5" fill="#fff" opacity="0.6"/>
+                            <rect x="24" y="47" width="32" height="3" rx="1.5" fill="#fff" opacity="0.5"/>
+                            <!-- Percent sign -->
+                            <text x="55" y="55" font-size="14" fill="#FFD700" font-weight="bold" opacity="0.9">%</text>
+                            <!-- Stars -->
+                            <circle cx="68" cy="15" r="2" fill="#FFD700" opacity="0.8"/>
+                            <circle cx="12" cy="68" r="2.5" fill="#a855f7" opacity="0.6"/>
+                            <circle cx="72" cy="66" r="1.5" fill="#FFD700" opacity="0.5"/>
+                        </svg>
+                    </div>
+                    <div class="bonus-info">
+                        <div class="bonus-title">Промокод</div>
+                        <div class="bonus-desc">Арнайы кодыңыз бар ма? Монета алыңыз!</div>
+                        <div class="promo-input-row">
+                            <input type="text" class="promo-input" id="promoInput" placeholder="PROMO2025" maxlength="20">
+                            <button class="bonus-btn promo-submit-btn" onclick="redeemPromo()">Қолдану</button>
+                        </div>
+                        <div class="promo-status" id="promoStatus"></div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- ===== БОНУС СЕКЦИЯСЫ СОҢЫ ===== -->
+
         </div>
     </main>
 
@@ -1197,6 +1347,7 @@
             </div>
             <h2 class="reward-title">Құттықтаймыз!</h2>
             <p class="reward-subtitle" id="rewardRarity">ЭПИКАЛЫҚ</p>
+            <p class="reward-avatar-name" id="rewardAvatarName"></p>
             <button class="btn-close" onclick="closeModal()">Жалғастыру</button>
         </div>
     </div>
@@ -1381,17 +1532,18 @@
                     userBalance = result.new_balance;
                     animateValue('user-balance', oldBalance, userBalance, 500);
 
-                    showModal(result.rarity, result.url, result.is_new);
+                    showModal(result.rarity, result.url, result.is_new, result.avatar_id || result.id);
                 }, 200);
 
                 setTimeout(() => { flashBang.classList.remove('flash-active'); }, 1000);
             }, 2500);
         }
 
-        function showModal(rarity, avatarUrl, isNew) {
+        function showModal(rarity, avatarUrl, isNew, avatarId) {
             const modal = document.getElementById('rewardModal');
             const img = document.getElementById('rewardImg');
             const rarityText = document.getElementById('rewardRarity');
+            const nameText = document.getElementById('rewardAvatarName');
             const rays = document.getElementById('modalRays');
             const badgeNew = modal.querySelector('.badge-new');
 
@@ -1411,6 +1563,12 @@
             rarityText.innerText = avatarInfo.text;
             rarityText.style.color = avatarInfo.color;
             rarityText.style.textShadow = `0 0 20px ${avatarInfo.color}80`;
+
+            // Показываем имя аватара
+            if (nameText) {
+                nameText.innerText = getAvatarName(avatarId) || '';
+                nameText.style.color = avatarInfo.color;
+            }
 
             // Показываем "Жаңа Аватар" только если это реально новая аватарка
             if (badgeNew) badgeNew.style.display = isNew ? 'block' : 'none';

@@ -128,15 +128,51 @@ document.addEventListener('DOMContentLoaded', initPageTransitions);
 
 // ------ 8. АВАТАРКА В САЙДБАРЕ (используется на всех страницах) ----
 //  Вызывать после DOMContentLoaded на каждой защищённой странице.
-//  Находит первый элемент с id="sidebarAvatar" и проставляет src из API.
+//  Находит элемент с id="sidebarAvatar" и проставляет src из API + кеш.
 async function loadSidebarAvatar() {
     const img = document.getElementById('sidebarAvatar');
     if (!img) return;
+
+    // Сразу показываем кешированный аватар (без мерцания)
+    const cached = localStorage.getItem('cachedAvatarUrl');
+    if (cached) img.src = cached;
+
     try {
         const res = await apiFetch('/api/v1/profile');
         const data = await res.json();
-        if (data.avatar_url) {
-            img.src = data.avatar_url;
+        const url = data.avatar_url || data.avatar;
+        if (url) {
+            img.src = url;
+            localStorage.setItem('cachedAvatarUrl', url);
         }
-    } catch (_) { /* молчим — дефолтная картинка уже стоит */ }
+    } catch (_) { /* молчим — кешированная или дефолтная картинка */ }
+}
+
+
+// ------ 9. ИМЕНА АВАТАРОК ----------------------------------------
+//  Используется в шопе и профиле для отображения названия под аватаром.
+const AVATAR_NAMES = {
+    // Common
+    'common_1':    'Дала Жауынгері',
+    'common_2':    'Күзетші',
+    'common_3':    'Садақшы',
+    'common_4':    'Жаяу Сарбаз',
+    'common_5':    'Жас Батыр',
+    // Rare
+    'rare_1':      'Сарбаз Басшы',
+    'rare_2':      'Ат Жауынгер',
+    'rare_3':      'Найзагер',
+    'rare_4':      'Дала Барысы',
+    // Epic
+    'epic_1':      'Хан Нөкері',
+    'epic_2':      'Темір Қалқан',
+    'epic_3':      'Жеңілмес Ер',
+    // Legendary
+    'legendary_1': 'Кенесары Хан',
+    'legendary_2': 'Аруана Ханым',
+    'legendary_3': 'Наурызбай Батыр',
+};
+
+function getAvatarName(avatarId) {
+    return AVATAR_NAMES[avatarId] || 'Белгісіз Жауынгер';
 }

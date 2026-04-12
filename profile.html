@@ -330,13 +330,51 @@
         .avatar-item {
             position: relative;
             width: 100%;
-            aspect-ratio: 1;
-            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
             cursor: pointer;
             opacity: 0;
             transform: translateY(20px);
             animation: slideUpFade 0.5s forwards;
             transition: all 0.3s ease;
+        }
+
+        .avatar-name-label {
+            font-size: 9px;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: 0.3px;
+            line-height: 1.2;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 100%;
+        }
+
+        .avatar-item.active .avatar-name-label { color: #fff; }
+        .rarity-rare .avatar-name-label { color: var(--rarity-rare); }
+        .rarity-epic .avatar-name-label { color: var(--rarity-epic); }
+        .rarity-legendary .avatar-name-label { color: var(--rarity-legendary); }
+        .locked .avatar-name-label { opacity: 0.35; }
+
+        /* Атауы бар профиль негізгі аватарының астында */
+        .current-avatar-name {
+            font-family: 'Cinzel', serif;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-align: center;
+            margin-top: -30px;
+            margin-bottom: 20px;
+            color: var(--accent-gold);
+            text-shadow: 0 0 10px rgba(212,175,55,0.4);
+            min-height: 20px;
+            transition: color 0.3s;
         }
 
         @keyframes slideUpFade {
@@ -346,7 +384,7 @@
 
         .avatar-img {
             width: 100%;
-            height: 100%;
+            aspect-ratio: 1;
             border-radius: 50%;
             border: 2px solid transparent;
             object-fit: cover;
@@ -449,6 +487,7 @@
                     <div class="avatar-wrapper">
                         <img src="" id="mainAvatarDisplay" class="current-avatar" alt="Avatar">
                     </div>
+                    <div class="current-avatar-name" id="currentAvatarName"></div>
                     
                     <div class="input-group">
                         <label>Никнейм</label>
@@ -519,21 +558,36 @@
             mainImg.style.borderColor = rarityColor;
             mainImg.style.boxShadow = '0 0 30px ' + rarityColor + '80';
 
+            // Негізгі аватардың атын көрсету
+            const nameEl = document.getElementById('currentAvatarName');
+            if (nameEl) {
+                nameEl.textContent = getAvatarName(currentAvatar.id);
+                nameEl.style.color = rarityColor;
+            }
+
             const sidebarImg = document.getElementById('sidebarAvatarDisplay');
-            sidebarImg.src = currentAvatar.url;
-            sidebarImg.style.borderColor = rarityColor;
+            if (sidebarImg) {
+                sidebarImg.src = currentAvatar.url;
+                sidebarImg.style.borderColor = rarityColor;
+            }
 
             inventory.forEach((avatar, index) => {
                 const wrapper = document.createElement('div');
                 wrapper.className = 'avatar-item rarity-' + avatar.rarity;
                 wrapper.style.animationDelay = (index * 0.05) + 's';
+
                 const img = document.createElement('img');
                 img.src = avatar.url;
                 img.className = 'avatar-img';
                 if (avatar.id === currentSelectedId) wrapper.classList.add('active');
 
-                // Fix #10: сначала img, потом lockIcon — иначе замок перекрывается аватаркой
                 wrapper.appendChild(img);
+
+                // Аватар аты
+                const nameLabel = document.createElement('span');
+                nameLabel.className = 'avatar-name-label';
+                nameLabel.textContent = getAvatarName(avatar.id);
+                wrapper.appendChild(nameLabel);
 
                 if (!avatar.is_unlocked) {
                     wrapper.classList.add('locked');
@@ -541,7 +595,7 @@
                     const lockIcon = document.createElement('img');
                     lockIcon.src = 'https://cdn-icons-png.flaticon.com/512/3064/3064155.png';
                     lockIcon.className = 'lock-icon';
-                    wrapper.appendChild(lockIcon); // поверх img
+                    wrapper.insertBefore(lockIcon, nameLabel); // замок над img, но под label
                 } else {
                     wrapper.onclick = () => selectAvatar(avatar.id);
                 }
@@ -566,6 +620,16 @@
                     body: JSON.stringify({ avatar_id: currentSelectedId })
                 });
                 userProfile.avatar = currentSelectedId;
+
+                // Кешке жаңа аватар URL-ін сақтаймыз (барлық беттердегі sidebar үшін)
+                const selectedAvatar = inventory.find(a => a.id === currentSelectedId);
+                if (selectedAvatar && selectedAvatar.url) {
+                    localStorage.setItem('cachedAvatarUrl', selectedAvatar.url);
+                    // Sidebar аватарын дереу жаңартамыз
+                    const sidebarImg = document.getElementById('sidebarAvatarDisplay');
+                    if (sidebarImg) sidebarImg.src = selectedAvatar.url;
+                }
+
                 btn.innerText = 'Сақталды ✓';
                 btn.style.background = 'var(--success)';
                 btn.style.color = '#fff';
