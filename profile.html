@@ -28,7 +28,7 @@
 
             /* Түстер (Редкость) */
             --rarity-common: #94a3b8;    /* Обычная - Серая */
-            --rarity-rare: #3b82f6;      /* Редкая - Синяя */
+            --rarity-rare: #3b82f6;      /* Редкая - Көк (Синяя) */
             --rarity-epic: #a855f7;      /* Эпик - Фиолетовая */
             --rarity-legendary: #D4AF37; /* Лега - Желтая/Золотая */
         }
@@ -386,9 +386,8 @@
             width: 100%;
             aspect-ratio: 1 / 1;
             border-radius: 50%;
-            border: 2.5px solid transparent;
+            border: 2px solid transparent;
             object-fit: cover;
-            object-position: center top;
             transition: box-shadow 0.3s ease;
             background-color: #1e293b;
             display: block;
@@ -408,10 +407,10 @@
         }
 
         /* Свечение у активного */
-        .avatar-item.active.rarity-common .avatar-img { box-shadow: 0 0 15px #94a3b8; }
+        .avatar-item.active.rarity-common .avatar-img { box-shadow: 0 0 15px var(--rarity-common); }
         .avatar-item.active.rarity-rare .avatar-img { box-shadow: 0 0 15px #3b82f6, 0 0 30px #3b82f680; }
-        .avatar-item.active.rarity-epic .avatar-img { box-shadow: 0 0 15px #a855f7, 0 0 30px #a855f780; }
-        .avatar-item.active.rarity-legendary .avatar-img { box-shadow: 0 0 20px #D4AF37, 0 0 40px #D4AF3780; }
+        .avatar-item.active.rarity-epic .avatar-img { box-shadow: 0 0 15px var(--rarity-epic); }
+        .avatar-item.active.rarity-legendary .avatar-img { box-shadow: 0 0 20px var(--rarity-legendary); }
 
         /* Жабық аватар стилі */
         .locked .avatar-img {
@@ -558,7 +557,7 @@
             mainImg.src = resolveAvatarUrl(currentAvatar.id);
             const rarityColor = getRarityColor(currentAvatar.rarity);
             mainImg.style.borderColor = rarityColor;
-            mainImg.style.boxShadow = '0 0 30px ' + rarityColor + '80';
+            mainImg.style.boxShadow = `0 0 30px ${rarityColor}99, 0 0 60px ${rarityColor}33`;
 
             // Негізгі аватардың атын көрсету
             const nameEl = document.getElementById('currentAvatarName');
@@ -571,7 +570,6 @@
             if (sidebarImg) {
                 sidebarImg.src = resolveAvatarUrl(currentAvatar.id);
                 sidebarImg.style.borderColor = rarityColor;
-                sidebarImg.style.boxShadow = `0 0 12px ${rarityColor}CC, 0 0 24px ${rarityColor}66`;
             }
 
             inventory.forEach((avatar, index) => {

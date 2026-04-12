@@ -91,28 +91,26 @@ function initPageTransitions() {
 document.addEventListener('DOMContentLoaded', initPageTransitions);
 
 // ------ 8. КАРТА URL АВАТАРОК ----------------------------
-//  ID-лер сервердегі allAvatars массивімен ДӘЛМЕ-ДӘЛ сәйкес болуы керек:
-//  common_1, common_2, common_3
-//  rare_1, rare_2, rare_3
-//  epic_1, epic_2
-//  legendary_1, legendary_2
+//  ID-лер сервердегі allAvatars массивімен ДӘЛМЕ-ДӘЛ сәйкес болуы керек
 
 const DEFAULT_AVATAR_URL = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
 
+// Сервер беретін URL-дер (relative paths, Go NoRoute арқылы беріледі)
 const AVATAR_URLS = {
-    'common_1':    'ава1.png',
-    'common_2':    '3a18b683-5363-4267-a890-59cc2f5f6d87.jpeg',
-    'common_3':    'ава3.jpeg',
-    'rare_1':      'a7d505b9-5b86-4057-8b87-9348b5983ddb.jpeg',
-    'rare_2':      'ава5.jpeg',
-    'rare_3':      'ава6.jpeg',
-    'epic_1':      'ава 7.jpeg',
-    'epic_2':      'ава8.jpeg',
-    'legendary_1': 'ава9.jpeg',
-    'legendary_2': 'ава10.jpeg',   // ← было legendary_3, исправлено на legendary_2
+    'common_1':    '/ава1.png',
+    'common_2':    '/3a18b683-5363-4267-a890-59cc2f5f6d87.jpeg',
+    'common_3':    '/ава3.jpeg',
+    'rare_1':      '/a7d505b9-5b86-4057-8b87-9348b5983ddb.jpeg',
+    'rare_2':      '/ава5.jpeg',
+    'rare_3':      '/ава6.jpeg',
+    'epic_1':      '/%D0%B0%D0%B2%D0%B0%207.jpeg',
+    'epic_2':      '/ава8.jpeg',
+    'legendary_1': '/ава9.jpeg',
+    'legendary_2': '/ава10.jpeg',
 };
 
 function resolveAvatarUrl(avatarId) {
+    if (!avatarId) return DEFAULT_AVATAR_URL;
     return AVATAR_URLS[avatarId] || DEFAULT_AVATAR_URL;
 }
 
@@ -131,20 +129,20 @@ function getAvatarRarity(avatarId) {
 function getRarityGlowColor(rarity) {
     const map = {
         common:    '#94a3b8',
-        rare:      '#3b82f6',   // синий
-        epic:      '#a855f7',   // фиолетовый
-        legendary: '#D4AF37',   // золотой
+        rare:      '#3b82f6',
+        epic:      '#a855f7',
+        legendary: '#D4AF37',
     };
     return map[rarity] || map.common;
 }
 
-// Применить rarity-стиль к img-элементу аватарки
+// Применить rarity border+glow к img элементу
 function applyRarityGlow(imgEl, avatarId) {
     if (!imgEl) return;
     const rarity = getAvatarRarity(avatarId);
     const color  = getRarityGlowColor(rarity);
     imgEl.style.borderColor = color;
-    imgEl.style.boxShadow   = `0 0 12px ${color}CC, 0 0 24px ${color}66`;
+    imgEl.style.boxShadow   = `0 0 10px ${color}BB, 0 0 20px ${color}55`;
 }
 
 async function loadSidebarAvatar() {
@@ -167,11 +165,8 @@ async function loadSidebarAvatar() {
         const res = await apiFetch('/api/v1/profile');
         const data = await res.json();
 
-        let url = data.avatar_url || null;
-        if (!url && data.avatar) {
-            url = resolveAvatarUrl(data.avatar);
-        }
-        if (!url) url = DEFAULT_AVATAR_URL;
+        // ID бойынша URL жасаймыз (сервер relative URL береді)
+        const url = data.avatar ? resolveAvatarUrl(data.avatar) : DEFAULT_AVATAR_URL;
 
         imgs.forEach(img => {
             img.src = url;

@@ -29,7 +29,7 @@
             --rarity-common: #94a3b8;
             /* Обычная - Сұр */
             --rarity-rare: #3b82f6;
-            /* Редкая - Көк (Синяя) */
+            /* Редкая - Жасыл */
             --rarity-epic: #a855f7;
             /* Эпик - Күлгін */
             --rarity-legendary: #D4AF37;
@@ -1512,13 +1512,8 @@
             }, 2500);
         }
 
-        // Компенсация за повторную аватарку (монеты)
-        const DUPLICATE_COMPENSATION = {
-            'common':    150,
-            'rare':      500,
-            'epic':      1500,
-            'legendary': 5000
-        };
+        // Дублікат компенсациясы
+        const DUPLICATE_COMPENSATION = { common: 150, rare: 500, epic: 1500, legendary: 5000 };
 
         function showModal(rarity, avatarUrl, isNew, avatarId) {
             const modal = document.getElementById('rewardModal');
@@ -1537,55 +1532,43 @@
 
             const avatarInfo = rarities[rarity] || rarities.common;
 
-            img.src = avatarUrl || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+            // Аватар суретін ID бойынша шешеміз
+            const resolvedUrl = (typeof resolveAvatarUrl === 'function' && avatarId)
+                ? resolveAvatarUrl(avatarId)
+                : (avatarUrl || 'https://cdn-icons-png.flaticon.com/512/149/149071.png');
+            img.src = resolvedUrl;
             img.style.borderColor = avatarInfo.color;
             img.style.boxShadow = `0 0 50px ${avatarInfo.color}80`;
 
-            // Показываем имя аватарки
             if (nameText) {
-                const name = (typeof getAvatarName === 'function') ? getAvatarName(avatarId) : '';
-                nameText.innerText = name;
+                nameText.innerText = (typeof getAvatarName === 'function') ? getAvatarName(avatarId) : '';
                 nameText.style.color = avatarInfo.color;
             }
 
-            // --- Дублікат логикасы ---
+            // Дублікат немесе жаңа аватар логикасы
             let dupBadge = modal.querySelector('.badge-duplicate');
             if (!dupBadge) {
                 dupBadge = document.createElement('div');
                 dupBadge.className = 'badge-duplicate';
-                // Вставить после badge-new
                 badgeNew.parentNode.insertBefore(dupBadge, badgeNew.nextSibling);
             }
 
             if (!isNew) {
-                // Повторная — показываем компенсацию
                 const coins = DUPLICATE_COMPENSATION[rarity] || 150;
                 rarityText.innerText = avatarInfo.text + ' — ҚАЙТАЛАМА';
-                dupBadge.style.display = 'block';
-                dupBadge.innerHTML = `+${coins.toLocaleString('ru-RU')} ТГ өтемақы`;
-                dupBadge.style.cssText = `
-                    display: block;
-                    margin: 8px auto 0;
-                    padding: 6px 20px;
-                    background: rgba(212,175,55,0.15);
-                    border: 1px solid #D4AF37;
-                    border-radius: 100px;
-                    color: #D4AF37;
-                    font-size: 16px;
-                    font-weight: 800;
-                    letter-spacing: 1px;
-                    text-align: center;
-                    width: fit-content;
-                `;
                 if (badgeNew) badgeNew.style.display = 'none';
-                // Анимация монет через небольшую задержку (когда модалка открылась)
-                setTimeout(() => {
-                    spawnCoinsAnimation(img, coins);
-                }, 500);
+                dupBadge.style.cssText = `
+                    display:block; margin:8px auto 0; padding:6px 20px;
+                    background:rgba(212,175,55,0.15); border:1px solid #D4AF37;
+                    border-radius:100px; color:#D4AF37; font-size:15px;
+                    font-weight:800; letter-spacing:1px; text-align:center; width:fit-content;
+                `;
+                dupBadge.innerHTML = `+${coins.toLocaleString('ru-RU')} ТГ өтемақы`;
+                setTimeout(() => spawnCoinsAnimation(img, coins), 500);
             } else {
                 rarityText.innerText = avatarInfo.text;
-                dupBadge.style.display = 'none';
                 if (badgeNew) badgeNew.style.display = 'block';
+                dupBadge.style.display = 'none';
             }
 
             rarityText.style.color = avatarInfo.color;

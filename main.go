@@ -84,16 +84,16 @@ type AvatarMeta struct {
 
 // Все аватарки в игре (источник правды)
 var allAvatars = []AvatarMeta{
-	{ID: "common_1", Rarity: "common", URL: "https://cdn-icons-png.flaticon.com/512/149/149071.png"},
-	{ID: "common_2", Rarity: "common", URL: "https://cdn-icons-png.flaticon.com/512/4140/4140048.png"},
-	{ID: "common_3", Rarity: "common", URL: "https://cdn-icons-png.flaticon.com/512/4140/4140051.png"},
-	{ID: "rare_1", Rarity: "rare", URL: "https://cdn-icons-png.flaticon.com/512/4140/4140060.png"},
-	{ID: "rare_2", Rarity: "rare", URL: "https://cdn-icons-png.flaticon.com/512/4140/4140047.png"},
-	{ID: "rare_3", Rarity: "rare", URL: "https://cdn-icons-png.flaticon.com/512/4140/4140061.png"},
-	{ID: "epic_1", Rarity: "epic", URL: "https://cdn-icons-png.flaticon.com/512/4140/4140077.png"},
-	{ID: "epic_2", Rarity: "epic", URL: "https://cdn-icons-png.flaticon.com/512/4140/4140085.png"},
-	{ID: "legendary_1", Rarity: "legendary", URL: "https://cdn-icons-png.flaticon.com/512/4140/4140037.png"},
-	{ID: "legendary_2", Rarity: "legendary", URL: "https://cdn-icons-png.flaticon.com/512/4140/4140100.png"},
+	{ID: "common_1",    Rarity: "common",    URL: "/ава1.png"},
+	{ID: "common_2",    Rarity: "common",    URL: "/3a18b683-5363-4267-a890-59cc2f5f6d87.jpeg"},
+	{ID: "common_3",    Rarity: "common",    URL: "/ава3.jpeg"},
+	{ID: "rare_1",      Rarity: "rare",      URL: "/a7d505b9-5b86-4057-8b87-9348b5983ddb.jpeg"},
+	{ID: "rare_2",      Rarity: "rare",      URL: "/ава5.jpeg"},
+	{ID: "rare_3",      Rarity: "rare",      URL: "/ава6.jpeg"},
+	{ID: "epic_1",      Rarity: "epic",      URL: "/%D0%B0%D0%B2%D0%B0%207.jpeg"},
+	{ID: "epic_2",      Rarity: "epic",      URL: "/ава8.jpeg"},
+	{ID: "legendary_1", Rarity: "legendary", URL: "/ава9.jpeg"},
+	{ID: "legendary_2", Rarity: "legendary", URL: "/ава10.jpeg"},
 }
 
 // Шансы выпадения по типу сундука: rarity -> вес
