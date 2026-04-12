@@ -461,6 +461,14 @@
 
                 table.innerHTML = `<tr><th>Орын</th><th>Ойыншы</th><th>Ұпай</th><th>Уақыт</th></tr>`;
                 
+                // Redкость бойынша border түсі
+                const rarityColors = {
+                    common:    '#94a3b8',
+                    rare:      '#3b82f6',
+                    epic:      '#a855f7',
+                    legendary: '#D4AF37'
+                };
+
                 data.slice(0, 10).forEach((user, index) => {
                     const tr = document.createElement('tr');
                     
@@ -473,12 +481,19 @@
                     if(index === 1) rankText = "🥈 2";
                     if(index === 2) rankText = "🥉 3";
 
-                    let avatarUrl = user.avatar_url || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+                    // avatar_id бойынша URL шешу (utils.js-тен resolveAvatarUrl)
+                    const avatarId  = user.avatar_id || '';
+                    const avatarUrl = (typeof resolveAvatarUrl === 'function' && avatarId)
+                        ? resolveAvatarUrl(avatarId)
+                        : (user.avatar_url || 'https://cdn-icons-png.flaticon.com/512/149/149071.png');
+                    const rarity    = user.rarity || 'common';
+                    const glowColor = rarityColors[rarity] || rarityColors.common;
+                    const avatarStyle = `border-color:${glowColor}; box-shadow:0 0 8px ${glowColor}BB, 0 0 16px ${glowColor}44;`;
 
                     tr.innerHTML = `
                         <td style="font-size:1.2rem; font-weight:bold;">${rankText}</td>
                         <td class="player-info-cell">
-                            <img src="${avatarUrl}" class="player-avatar" alt="avatar">
+                            <img src="${avatarUrl}" class="player-avatar" style="${avatarStyle}" alt="avatar">
                             <span class="player-name">${user.name}</span>
                         </td>
                         <td style="color:var(--accent-gold); font-weight:bold;">${user.score}/20</td>

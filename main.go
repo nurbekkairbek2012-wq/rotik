@@ -85,12 +85,12 @@ type AvatarMeta struct {
 // Все аватарки в игре (источник правды)
 var allAvatars = []AvatarMeta{
 	{ID: "common_1",    Rarity: "common",    URL: "/ава1.png"},
-	{ID: "common_2",    Rarity: "common",    URL: "/3a18b683-5363-4267-a890-59cc2f5f6d87.jpeg"},
+	{ID: "common_2",    Rarity: "common",    URL: "/ава2.png"},
 	{ID: "common_3",    Rarity: "common",    URL: "/ава3.jpeg"},
-	{ID: "rare_1",      Rarity: "rare",      URL: "/a7d505b9-5b86-4057-8b87-9348b5983ddb.jpeg"},
+	{ID: "rare_1",      Rarity: "rare",      URL: "/ава4.jpeg"},
 	{ID: "rare_2",      Rarity: "rare",      URL: "/ава5.jpeg"},
 	{ID: "rare_3",      Rarity: "rare",      URL: "/ава6.jpeg"},
-	{ID: "epic_1",      Rarity: "epic",      URL: "/%D0%B0%D0%B2%D0%B0%207.jpeg"},
+	{ID: "epic_1",      Rarity: "epic",      URL: "/ава7.jpeg"},
 	{ID: "epic_2",      Rarity: "epic",      URL: "/ава8.jpeg"},
 	{ID: "legendary_1", Rarity: "legendary", URL: "/ава9.jpeg"},
 	{ID: "legendary_2", Rarity: "legendary", URL: "/ава10.jpeg"},
@@ -489,6 +489,8 @@ func SubmitQuiz(c *gin.Context) {
 type LeaderEntry struct {
 	Name      string `json:"name"`
 	AvatarURL string `json:"avatar_url"`
+	AvatarID  string `json:"avatar_id"`
+	Rarity    string `json:"rarity"`
 	Score     int    `json:"score"`
 	TimeMs    int    `json:"time_ms"`
 }
@@ -507,20 +509,21 @@ func GetLeaderboard(c *gin.Context) {
 
 	entries := make([]LeaderEntry, len(users))
 	for i, u := range users {
-		// Подставляем реальный URL аватарки из allAvatars по avatar_id
-		avatarURL := ""
+		// Подставляем реальный URL и редкость аватарки из allAvatars по avatar_id
+		avatarURL := "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+		avatarRarity := "common"
 		for _, a := range allAvatars {
 			if a.ID == u.Avatar {
 				avatarURL = a.URL
+				avatarRarity = a.Rarity
 				break
 			}
-		}
-		if avatarURL == "" {
-			avatarURL = "https://cdn-icons-png.flaticon.com/512/149/149071.png" // дефолт
 		}
 		entries[i] = LeaderEntry{
 			Name:      u.Username,
 			AvatarURL: avatarURL,
+			AvatarID:  u.Avatar,
+			Rarity:    avatarRarity,
 			Score:     u.Score,
 			TimeMs:    u.TimeMs,
 		}

@@ -98,12 +98,12 @@ const DEFAULT_AVATAR_URL = 'https://cdn-icons-png.flaticon.com/512/149/149071.pn
 // Сервер беретін URL-дер (relative paths, Go NoRoute арқылы беріледі)
 const AVATAR_URLS = {
     'common_1':    '/ава1.png',
-    'common_2':    '/3a18b683-5363-4267-a890-59cc2f5f6d87.jpeg',
+    'common_2':    '/ава2.png',
     'common_3':    '/ава3.jpeg',
-    'rare_1':      '/a7d505b9-5b86-4057-8b87-9348b5983ddb.jpeg',
+    'rare_1':      '/ава4.jpeg',
     'rare_2':      '/ава5.jpeg',
     'rare_3':      '/ава6.jpeg',
-    'epic_1':      '/%D0%B0%D0%B2%D0%B0%207.jpeg',
+    'epic_1':      '/ава7.jpeg',
     'epic_2':      '/ава8.jpeg',
     'legendary_1': '/ава9.jpeg',
     'legendary_2': '/ава10.jpeg',
