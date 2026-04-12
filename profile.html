@@ -130,7 +130,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            overflow-y: auto;
+            
             padding: 40px 60px;
             position: relative;
         }
@@ -319,18 +319,14 @@
 
         .avatars-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 16px;
             background: rgba(0,0,0,0.2);
-            padding: 24px;
+            padding: 20px;
             border-radius: 16px;
             border: 1px solid var(--glass-border);
-            max-height: 420px;
-            overflow-y: auto;
         }
-
-        .avatars-grid::-webkit-scrollbar { width: 4px; }
-        .avatars-grid::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.3); border-radius: 4px; }
 
         .avatar-item {
             position: relative;
@@ -389,12 +385,13 @@
 
         .avatar-img {
             width: 100%;
-            aspect-ratio: 1;
+            aspect-ratio: 1 / 1;
             border-radius: 50%;
             border: 2px solid transparent;
             object-fit: cover;
-            transition: all 0.3s ease;
-            background-color: #1e293b; 
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+            background-color: #1e293b;
+            display: block;
         }
 
         /* Редкость түстері (Border) */
@@ -403,10 +400,9 @@
         .rarity-epic .avatar-img { border-color: var(--rarity-epic); }
         .rarity-legendary .avatar-img { border-color: var(--rarity-legendary); }
 
-        .avatar-item:hover:not(.locked) { transform: scale(1.1); z-index: 10; }
+        .avatar-item:hover:not(.locked) .avatar-img { box-shadow: 0 0 20px rgba(255,255,255,0.3); }
         
         .avatar-item.active {
-            transform: scale(1.15);
             z-index: 5;
         }
 
@@ -558,7 +554,7 @@
             if (!currentAvatar) return;
 
             const mainImg = document.getElementById('mainAvatarDisplay');
-            mainImg.src = resolveAvatarUrl(currentAvatar.id);
+            mainImg.src = currentAvatar.url;
             const rarityColor = getRarityColor(currentAvatar.rarity);
             mainImg.style.borderColor = rarityColor;
             mainImg.style.boxShadow = '0 0 30px ' + rarityColor + '80';
@@ -572,7 +568,7 @@
 
             const sidebarImg = document.getElementById('sidebarAvatarDisplay');
             if (sidebarImg) {
-                sidebarImg.src = resolveAvatarUrl(currentAvatar.id);
+                sidebarImg.src = currentAvatar.url;
                 sidebarImg.style.borderColor = rarityColor;
             }
 
@@ -586,7 +582,7 @@
                 imgContainer.style.cssText = 'position:relative;width:100%;aspect-ratio:1;';
 
                 const img = document.createElement('img');
-                img.src = resolveAvatarUrl(avatar.id);
+                img.src = avatar.url;
                 img.className = 'avatar-img';
                 if (avatar.id === currentSelectedId) wrapper.classList.add('active');
 

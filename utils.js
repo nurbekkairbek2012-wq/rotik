@@ -91,6 +91,12 @@ function initPageTransitions() {
 document.addEventListener('DOMContentLoaded', initPageTransitions);
 
 // ------ 8. КАРТА URL АВАТАРОК ----------------------------
+//  ID-лер сервердегі allAvatars массивімен ДӘЛМЕ-ДӘЛ сәйкес болуы керек:
+//  common_1, common_2, common_3
+//  rare_1, rare_2, rare_3
+//  epic_1, epic_2
+//  legendary_1, legendary_2
+
 const DEFAULT_AVATAR_URL = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
 
 const AVATAR_URLS = {
@@ -103,7 +109,7 @@ const AVATAR_URLS = {
     'epic_1':      'ава 7.jpeg',
     'epic_2':      'ава8.jpeg',
     'legendary_1': 'ава9.jpeg',
-    'legendary_3': 'ава10.jpeg',
+    'legendary_2': 'ава10.jpeg',   // ← было legendary_3, исправлено на legendary_2
 };
 
 function resolveAvatarUrl(avatarId) {
@@ -111,8 +117,6 @@ function resolveAvatarUrl(avatarId) {
 }
 
 // ------ 9. АВАТАРКА В САЙДБАРЕ ----------------------------
-//  Ищет sidebarAvatar и sidebarAvatarDisplay.
-//  Резолвит avatar_id -> URL через AVATAR_URLS, кеширует.
 async function loadSidebarAvatar() {
     const imgs = [
         document.getElementById('sidebarAvatar'),
@@ -120,7 +124,6 @@ async function loadSidebarAvatar() {
     ].filter(Boolean);
     if (imgs.length === 0) return;
 
-    // Показываем кеш сразу (без мерцания)
     const cachedUrl = localStorage.getItem('cachedAvatarUrl');
     if (cachedUrl) imgs.forEach(img => { img.src = cachedUrl; });
 
@@ -128,7 +131,6 @@ async function loadSidebarAvatar() {
         const res = await apiFetch('/api/v1/profile');
         const data = await res.json();
 
-        // Приоритет: avatar_url > avatar (id резолвится) > дефолт
         let url = data.avatar_url || null;
         if (!url && data.avatar) {
             url = resolveAvatarUrl(data.avatar);
@@ -142,6 +144,7 @@ async function loadSidebarAvatar() {
 }
 
 // ------ 10. ИМЕНА АВАТАРОК --------------------------------
+//  ID-лер сервердегі allAvatars-пен сәйкес
 const AVATAR_NAMES = {
     'common_1':    'Дала Жауынгері',
     'common_2':    'Күзетші',
@@ -152,7 +155,7 @@ const AVATAR_NAMES = {
     'epic_1':      'Хан Нөкері',
     'epic_2':      'Темір Қалқан',
     'legendary_1': 'Кенесары Хан',
-    'legendary_3': 'Наурызбай Батыр',
+    'legendary_2': 'Аруана Ханым',
 };
 
 function getAvatarName(avatarId) {
@@ -160,8 +163,6 @@ function getAvatarName(avatarId) {
 }
 
 // ------ 11. АНИМАЦИЯ МОНЕТ --------------------------------
-//  Вызов: spawnCoinsAnimation(anchorElement, coinsCount)
-//  anchorElement — DOM-элемент, от которого полетят монеты (можно null)
 function spawnCoinsAnimation(anchorEl, coinsCount) {
     const rect = anchorEl
         ? anchorEl.getBoundingClientRect()
@@ -211,7 +212,6 @@ function spawnCoinsAnimation(anchorEl, coinsCount) {
         setTimeout(() => { coin.remove(); style.remove(); }, totalMs);
     }
 
-    // Всплывающий "+N ТГ"
     const uid2 = Date.now();
     const popup = document.createElement('div');
     popup.textContent = `+${coinsCount.toLocaleString('ru-RU')} ТГ`;
