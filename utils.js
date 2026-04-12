@@ -1,19 +1,14 @@
 // ============================================================
 //  utils.js — общий модуль для всех страниц проекта
-//  Подключать ПЕРВЫМ тегом <script> на каждой странице:
-//  <script src="utils.js"></script>
+//  Подключать ПЕРВЫМ тегом <script> на каждой странице
 // ============================================================
  
 // ------ 1. БАЗОВЫЙ URL БЭКЕНДА ----------------------------
-//  На локальной машине будет localhost:8080
-//  На продакшн-сервере подставится реальный домен
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:8080'
-    : 'https://kenesary-server.onrender.com'; // <- поменяй на свой домен при деплое
- 
+    : 'https://kenesary-server.onrender.com';
  
 // ------ 2. ЗАГОЛОВКИ С ТОКЕНОМ ----------------------------
-//  Использовать во всех fetch-запросах к защищённым эндпоинтам
 function authHeaders() {
     return {
         'Content-Type': 'application/json',
@@ -21,99 +16,70 @@ function authHeaders() {
     };
 }
  
- 
 // ------ 3. ОБЁРТКА НАД fetch ------------------------------
-//  - Автоматически добавляет Authorization заголовок
-//  - При 401 (токен истёк/недействителен) — чистит хранилище и редиректит на логин
-//  - Бросает ошибку если ответ не ok, чтобы catch в вызывающем коде её поймал
 async function apiFetch(endpoint, options = {}) {
     const url = API_BASE + endpoint;
- 
     const config = {
         ...options,
-        headers: {
-            ...authHeaders(),
-            ...(options.headers || {})
-        }
+        headers: { ...authHeaders(), ...(options.headers || {}) }
     };
- 
     const response = await fetch(url, config);
- 
     if (response.status === 401) {
         localStorage.removeItem('token');
         localStorage.removeItem('username');
         window.location.href = 'login.html';
-        return; // прерываем выполнение
+        return;
     }
- 
     if (!response.ok) {
-        // Пробуем прочитать тело ошибки от сервера
         let errMsg = `HTTP ${response.status}`;
         try {
             const errData = await response.json();
             errMsg = errData.error || errData.message || errMsg;
-        } catch (_) { /* тело не JSON — оставляем HTTP-статус */ }
+        } catch (_) {}
         throw new Error(errMsg);
     }
- 
     return response;
 }
  
- 
 // ------ 4. AUTH GUARD -------------------------------------
-//  Вызывать на каждой защищённой странице (все кроме login.html и register.html)
-//  Если токена нет — сразу редирект, страница не отрисуется
 function requireAuth() {
     if (!localStorage.getItem('token')) {
         window.location.href = 'login.html';
     }
 }
  
- 
 // ------ 5. ВЫХОД (LOGOUT) ---------------------------------
 function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
+    localStorage.removeItem('cachedAvatarUrl');
+    localStorage.removeItem('cachedAvatarId');
     window.location.href = 'login.html';
 }
  
- 
-// ------ 6. АНИМАЦИЯ ЧИСЛА (используется везде) -----------
-//  animateValue('elementId', 0, 15400, 1000)
+// ------ 6. АНИМАЦИЯ ЧИСЛА ---------------------------------
 function animateValue(id, start, end, duration) {
     const obj = document.getElementById(id);
     if (!obj) return;
-    if (start === end) {
-        obj.innerHTML = end.toLocaleString('ru-RU');
-        return;
-    }
+    if (start === end) { obj.innerHTML = end.toLocaleString('ru-RU'); return; }
     const range = end - start;
-    const increment = end > start
-        ? Math.ceil(range / (duration / 30))
-        : Math.floor(range / (duration / 30));
+    const increment = end > start ? Math.ceil(range / (duration / 30)) : Math.floor(range / (duration / 30));
     let current = start;
     const timer = setInterval(() => {
         current += increment;
         if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
-            current = end;
-            clearInterval(timer);
+            current = end; clearInterval(timer);
         }
         obj.innerHTML = current.toLocaleString('ru-RU');
     }, 30);
 }
  
- 
 // ------ 7. ПЛАВНЫЙ ПЕРЕХОД МЕЖДУ СТРАНИЦАМИ --------------
-//  Автоматически вешается на все <a> при загрузке DOM
 function initPageTransitions() {
     document.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', function (e) {
             const href = this.getAttribute('href');
-            if (
-                href && href !== '#' &&
-                this.hostname === window.location.hostname &&
-                this.target !== '_blank'
-            ) {
+            if (href && href !== '#' && this.hostname === window.location.hostname && this.target !== '_blank') {
                 e.preventDefault();
                 document.body.style.transition = 'opacity 0.4s';
                 document.body.style.opacity = '0';
@@ -122,52 +88,78 @@ function initPageTransitions() {
         });
     });
 }
- 
 document.addEventListener('DOMContentLoaded', initPageTransitions);
 
+// ------ 8. КАРТА URL АВАТАРОК ----------------------------
+const DEFAULT_AVATAR_URL = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
 
-// ------ 8. АВАТАРКА В САЙДБАРЕ (используется на всех страницах) ----
-//  Вызывать после DOMContentLoaded на каждой защищённой странице.
-//  Находит элемент с id="sidebarAvatar" и проставляет src из API + кеш.
+const AVATAR_URLS = {
+    'common_1':    'https://cdn-icons-png.flaticon.com/512/149/149071.png',
+    'common_2':    'https://cdn-icons-png.flaticon.com/512/4140/4140048.png',
+    'common_3':    'https://cdn-icons-png.flaticon.com/512/4140/4140051.png',
+    'common_4':    'https://cdn-icons-png.flaticon.com/512/4140/4140060.png',
+    'common_5':    'https://cdn-icons-png.flaticon.com/512/4140/4140051.png',
+    'rare_1':      'https://cdn-icons-png.flaticon.com/512/4140/4140060.png',
+    'rare_2':      'https://cdn-icons-png.flaticon.com/512/4140/4140047.png',
+    'rare_3':      'https://cdn-icons-png.flaticon.com/512/4140/4140061.png',
+    'rare_4':      'https://cdn-icons-png.flaticon.com/512/4140/4140061.png',
+    'epic_1':      'https://cdn-icons-png.flaticon.com/512/4140/4140077.png',
+    'epic_2':      'https://cdn-icons-png.flaticon.com/512/4140/4140085.png',
+    'epic_3':      'https://cdn-icons-png.flaticon.com/512/4140/4140085.png',
+    'legendary_1': 'https://cdn-icons-png.flaticon.com/512/4140/4140037.png',
+    'legendary_2': 'https://cdn-icons-png.flaticon.com/512/4140/4140100.png',
+    'legendary_3': 'https://cdn-icons-png.flaticon.com/512/4140/4140037.png',
+};
+
+function resolveAvatarUrl(avatarId) {
+    return AVATAR_URLS[avatarId] || DEFAULT_AVATAR_URL;
+}
+
+// ------ 9. АВАТАРКА В САЙДБАРЕ ----------------------------
+//  Ищет sidebarAvatar и sidebarAvatarDisplay.
+//  Резолвит avatar_id -> URL через AVATAR_URLS, кеширует.
 async function loadSidebarAvatar() {
-    const img = document.getElementById('sidebarAvatar');
-    if (!img) return;
+    const imgs = [
+        document.getElementById('sidebarAvatar'),
+        document.getElementById('sidebarAvatarDisplay')
+    ].filter(Boolean);
+    if (imgs.length === 0) return;
 
-    // Сразу показываем кешированный аватар (без мерцания)
-    const cached = localStorage.getItem('cachedAvatarUrl');
-    if (cached) img.src = cached;
+    // Показываем кеш сразу (без мерцания)
+    const cachedUrl = localStorage.getItem('cachedAvatarUrl');
+    if (cachedUrl) imgs.forEach(img => { img.src = cachedUrl; });
 
     try {
         const res = await apiFetch('/api/v1/profile');
         const data = await res.json();
-        const url = data.avatar_url || data.avatar;
-        if (url) {
-            img.src = url;
-            localStorage.setItem('cachedAvatarUrl', url);
+
+        // Приоритет: avatar_url > avatar (id резолвится) > дефолт
+        let url = data.avatar_url || null;
+        if (!url && data.avatar) {
+            url = resolveAvatarUrl(data.avatar);
         }
-    } catch (_) { /* молчим — кешированная или дефолтная картинка */ }
+        if (!url) url = DEFAULT_AVATAR_URL;
+
+        imgs.forEach(img => { img.src = url; });
+        localStorage.setItem('cachedAvatarUrl', url);
+        if (data.avatar) localStorage.setItem('cachedAvatarId', data.avatar);
+    } catch (_) { /* используем кеш */ }
 }
 
-
-// ------ 9. ИМЕНА АВАТАРОК ----------------------------------------
-//  Используется в шопе и профиле для отображения названия под аватаром.
+// ------ 10. ИМЕНА АВАТАРОК --------------------------------
 const AVATAR_NAMES = {
-    // Common
     'common_1':    'Дала Жауынгері',
     'common_2':    'Күзетші',
     'common_3':    'Садақшы',
     'common_4':    'Жаяу Сарбаз',
     'common_5':    'Жас Батыр',
-    // Rare
     'rare_1':      'Сарбаз Басшы',
     'rare_2':      'Ат Жауынгер',
     'rare_3':      'Найзагер',
     'rare_4':      'Дала Барысы',
-    // Epic
     'epic_1':      'Хан Нөкері',
     'epic_2':      'Темір Қалқан',
     'epic_3':      'Жеңілмес Ер',
-    // Legendary
     'legendary_1': 'Кенесары Хан',
     'legendary_2': 'Аруана Ханым',
     'legendary_3': 'Наурызбай Батыр',
@@ -175,4 +167,75 @@ const AVATAR_NAMES = {
 
 function getAvatarName(avatarId) {
     return AVATAR_NAMES[avatarId] || 'Белгісіз Жауынгер';
+}
+
+// ------ 11. АНИМАЦИЯ МОНЕТ --------------------------------
+//  Вызов: spawnCoinsAnimation(anchorElement, coinsCount)
+//  anchorElement — DOM-элемент, от которого полетят монеты (можно null)
+function spawnCoinsAnimation(anchorEl, coinsCount) {
+    const rect = anchorEl
+        ? anchorEl.getBoundingClientRect()
+        : { left: window.innerWidth / 2, top: window.innerHeight / 2, width: 0, height: 0 };
+    const originX = rect.left + rect.width / 2;
+    const originY = rect.top + rect.height / 2;
+
+    const count = Math.min(28, Math.max(8, Math.floor(coinsCount / 15)));
+
+    let container = document.getElementById('_coinAnimContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = '_coinAnimContainer';
+        container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99999;overflow:hidden;';
+        document.body.appendChild(container);
+    }
+
+    for (let i = 0; i < count; i++) {
+        const coin = document.createElement('div');
+        const angle = (Math.random() * 360) * (Math.PI / 180);
+        const speed = 90 + Math.random() * 170;
+        const dx = Math.cos(angle) * speed;
+        const dy = -Math.abs(Math.sin(angle)) * speed - 80;
+        const size = 16 + Math.random() * 16;
+        const dur = 0.65 + Math.random() * 0.55;
+        const delay = Math.random() * 0.3;
+        const uid = Date.now() + '_' + i;
+
+        coin.style.cssText = `
+            position:absolute;left:${originX}px;top:${originY}px;
+            width:${size}px;height:${size}px;border-radius:50%;
+            background:radial-gradient(circle at 35% 35%,#ffe566,#D4AF37 60%,#a07800);
+            box-shadow:0 0 8px #D4AF3799,inset 0 -2px 4px rgba(0,0,0,0.3);
+            transform:translate(-50%,-50%);
+            animation:_cf${uid} ${dur}s ease-out ${delay}s forwards;
+            display:flex;align-items:center;justify-content:center;
+            font-size:9px;color:#7a5a00;font-weight:900;line-height:1;
+        `;
+        coin.textContent = '₸';
+
+        const style = document.createElement('style');
+        style.textContent = `@keyframes _cf${uid}{0%{transform:translate(-50%,-50%) scale(0.4);opacity:1}60%{opacity:1}100%{transform:translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px)) scale(1.1);opacity:0}}`;
+        document.head.appendChild(style);
+        container.appendChild(coin);
+
+        const totalMs = (dur + delay + 0.15) * 1000;
+        setTimeout(() => { coin.remove(); style.remove(); }, totalMs);
+    }
+
+    // Всплывающий "+N ТГ"
+    const uid2 = Date.now();
+    const popup = document.createElement('div');
+    popup.textContent = `+${coinsCount.toLocaleString('ru-RU')} ТГ`;
+    popup.style.cssText = `
+        position:fixed;left:${originX}px;top:${originY - 20}px;
+        transform:translateX(-50%);
+        font-family:'Montserrat',sans-serif;font-size:24px;font-weight:800;
+        color:#D4AF37;text-shadow:0 0 16px rgba(212,175,55,0.9),0 2px 5px rgba(0,0,0,0.9);
+        pointer-events:none;z-index:100000;
+        animation:_pp${uid2} 1.3s ease-out forwards;
+    `;
+    const ps = document.createElement('style');
+    ps.textContent = `@keyframes _pp${uid2}{0%{opacity:0;transform:translateX(-50%) translateY(0) scale(0.6)}20%{opacity:1;transform:translateX(-50%) translateY(-15px) scale(1.15)}70%{opacity:1;transform:translateX(-50%) translateY(-50px) scale(1)}100%{opacity:0;transform:translateX(-50%) translateY(-80px) scale(0.9)}}`;
+    document.head.appendChild(ps);
+    document.body.appendChild(popup);
+    setTimeout(() => { popup.remove(); ps.remove(); }, 1500);
 }

@@ -319,13 +319,18 @@
 
         .avatars-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 16px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
             background: rgba(0,0,0,0.2);
             padding: 24px;
             border-radius: 16px;
             border: 1px solid var(--glass-border);
+            max-height: 420px;
+            overflow-y: auto;
         }
+
+        .avatars-grid::-webkit-scrollbar { width: 4px; }
+        .avatars-grid::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.3); border-radius: 4px; }
 
         .avatar-item {
             position: relative;
@@ -629,12 +634,14 @@
 
                 // Кешке жаңа аватар URL-ін сақтаймыз (барлық беттердегі sidebar үшін)
                 const selectedAvatar = inventory.find(a => a.id === currentSelectedId);
-                if (selectedAvatar && selectedAvatar.url) {
-                    localStorage.setItem('cachedAvatarUrl', selectedAvatar.url);
-                    // Sidebar аватарын дереу жаңартамыз
-                    const sidebarImg = document.getElementById('sidebarAvatarDisplay');
-                    if (sidebarImg) sidebarImg.src = selectedAvatar.url;
-                }
+                const avatarUrl = (selectedAvatar && selectedAvatar.url)
+                    ? selectedAvatar.url
+                    : resolveAvatarUrl(currentSelectedId);
+                localStorage.setItem('cachedAvatarUrl', avatarUrl);
+                localStorage.setItem('cachedAvatarId', currentSelectedId);
+                // Sidebar аватарын дереу жаңартамыз
+                const sidebarImg = document.getElementById('sidebarAvatarDisplay');
+                if (sidebarImg) sidebarImg.src = avatarUrl;
 
                 btn.innerText = 'Сақталды ✓';
                 btn.style.background = 'var(--success)';

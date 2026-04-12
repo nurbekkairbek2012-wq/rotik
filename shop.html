@@ -1380,6 +1380,7 @@
                 const oldBal = userBalance;
                 userBalance = data.new_balance;
                 animateValue('user-balance', oldBal, userBalance, 600);
+                spawnCoinsAnimation(document.getElementById('dailyBtn'), data.coins_earned || 150);
 
                 // Краткое уведомление
                 const timer = document.getElementById('dailyTimer');
@@ -1428,6 +1429,7 @@
                 const oldBal = userBalance;
                 userBalance = data.new_balance;
                 animateValue('user-balance', oldBal, userBalance, 800);
+                spawnCoinsAnimation(document.getElementById('promoInput'), data.coins_earned);
 
                 status.textContent = `+${data.coins_earned.toLocaleString('ru-RU')} монета есептелді! ✓`;
                 status.className = 'promo-status success';
