@@ -232,7 +232,7 @@
 
         .avatar-wrapper {
             position: relative;
-            margin-bottom: 40px;
+            margin-bottom: 12px;
         }
 
         .current-avatar {
@@ -365,15 +365,15 @@
         /* Атауы бар профиль негізгі аватарының астында */
         .current-avatar-name {
             font-family: 'Cinzel', serif;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 700;
             letter-spacing: 1px;
             text-align: center;
-            margin-top: -30px;
-            margin-bottom: 20px;
+            margin-top: 0;
+            margin-bottom: 24px;
             color: var(--accent-gold);
             text-shadow: 0 0 10px rgba(212,175,55,0.4);
-            min-height: 20px;
+            min-height: 18px;
             transition: color 0.3s;
         }
 
@@ -576,17 +576,23 @@
                 wrapper.className = 'avatar-item rarity-' + avatar.rarity;
                 wrapper.style.animationDelay = (index * 0.05) + 's';
 
+                // Ішкі контейнер — аватар + замок үшін
+                const imgContainer = document.createElement('div');
+                imgContainer.style.cssText = 'position:relative;width:100%;aspect-ratio:1;';
+
                 const img = document.createElement('img');
                 img.src = avatar.url;
                 img.className = 'avatar-img';
                 if (avatar.id === currentSelectedId) wrapper.classList.add('active');
 
-                wrapper.appendChild(img);
+                imgContainer.appendChild(img);
 
                 // Аватар аты
                 const nameLabel = document.createElement('span');
                 nameLabel.className = 'avatar-name-label';
                 nameLabel.textContent = getAvatarName(avatar.id);
+
+                wrapper.appendChild(imgContainer);
                 wrapper.appendChild(nameLabel);
 
                 if (!avatar.is_unlocked) {
@@ -595,7 +601,7 @@
                     const lockIcon = document.createElement('img');
                     lockIcon.src = 'https://cdn-icons-png.flaticon.com/512/3064/3064155.png';
                     lockIcon.className = 'lock-icon';
-                    wrapper.insertBefore(lockIcon, nameLabel); // замок над img, но под label
+                    imgContainer.appendChild(lockIcon);
                 } else {
                     wrapper.onclick = () => selectAvatar(avatar.id);
                 }
