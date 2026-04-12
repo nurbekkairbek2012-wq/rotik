@@ -858,6 +858,140 @@
             transform: scale(1.05);
             box-shadow: 0 15px 40px rgba(255, 255, 255, 0.4);
         }
+
+        /* ===== BONUS ROW ===== */
+        .bonus-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            width: 100%;
+            max-width: 1300px;
+            padding: 0 0 50px 0;
+            margin-top: 40px;
+        }
+
+        .bonus-card {
+            border-radius: 24px;
+            padding: 28px 32px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .bonus-card:hover {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.15);
+        }
+
+        .bonus-icon {
+            font-size: 48px;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .bonus-info {
+            flex: 1;
+        }
+
+        .bonus-title {
+            font-family: 'Cinzel', serif;
+            font-size: 18px;
+            color: var(--accent-gold);
+            margin-bottom: 6px;
+        }
+
+        .bonus-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .bonus-timer {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .bonus-timer.available {
+            color: #10b981;
+        }
+
+        .bonus-btn {
+            flex-shrink: 0;
+            background: linear-gradient(135deg, var(--accent-gold) 0%, #B8860B 100%);
+            color: #000;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .bonus-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.5);
+        }
+
+        .bonus-btn:disabled {
+            background: rgba(255,255,255,0.08);
+            color: var(--text-muted);
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .promo-submit-btn {
+            padding: 10px 18px;
+            font-size: 13px;
+        }
+
+        .promo-input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        .promo-input {
+            flex: 1;
+            background: rgba(0,0,0,0.25);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px;
+            color: #fff;
+            padding: 10px 14px;
+            font-size: 14px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            letter-spacing: 1px;
+            outline: none;
+            text-transform: uppercase;
+            transition: border-color 0.3s;
+        }
+
+        .promo-input:focus {
+            border-color: var(--accent-gold);
+        }
+
+        .promo-status {
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 8px;
+            min-height: 18px;
+        }
+
+        .promo-status.success { color: #10b981; }
+        .promo-status.error   { color: #ef4444; }
+
+        @media (max-width: 900px) {
+            .bonus-row { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 
@@ -867,7 +1001,7 @@
         <div class="nav-items">
             <a href="profile.html" style="display: block; line-height: 0;">
                 <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="profile-avatar-btn"
-                    id="sidebarAvatar" title="Профиль" alt="Аватар">
+                    title="Профиль" alt="Аватар">
             </a>
         </div>
         <div class="nav-items">
@@ -1082,10 +1216,117 @@
             }
         }
 
+
+        // ===== ЕЖЕДНЕВНАЯ НАГРАДА =====
+        async function loadDailyStatus() {
+            try {
+                const res = await apiFetch('/api/v1/daily');
+                const data = await res.json();
+                const btn = document.getElementById('dailyBtn');
+                const timer = document.getElementById('dailyTimer');
+
+                if (data.available) {
+                    btn.disabled = false;
+                    timer.textContent = 'Қазір қол жетімді!';
+                    timer.className = 'bonus-timer available';
+                } else {
+                    btn.disabled = true;
+                    const h = data.remaining_hours;
+                    const m = data.remaining_minutes;
+                    timer.textContent = `Келесі сыйлыққа дейін: ${h} сағ ${m} мин`;
+                    timer.className = 'bonus-timer';
+                }
+            } catch (e) {
+                console.error('Daily status error:', e);
+            }
+        }
+
+        async function claimDaily() {
+            const btn = document.getElementById('dailyBtn');
+            btn.disabled = true;
+            btn.textContent = 'Жүктелуде...';
+            try {
+                const res = await apiFetch('/api/v1/daily', { method: 'POST' });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    alert(data.error || 'Қате шықты');
+                    return;
+                }
+
+                // Показываем анимацию монет
+                const oldBal = userBalance;
+                userBalance = data.new_balance;
+                animateValue('user-balance', oldBal, userBalance, 600);
+
+                // Краткое уведомление
+                const timer = document.getElementById('dailyTimer');
+                timer.textContent = '+150 монета есептелді! ✓';
+                timer.className = 'bonus-timer available';
+                btn.innerHTML = '✓ Алынды';
+
+                // Через 2 сек обновляем статус
+                setTimeout(loadDailyStatus, 2000);
+            } catch (e) {
+                alert('Серверде қате шықты');
+                btn.disabled = false;
+                btn.innerHTML = '<img src="https://cdn-icons-png.flaticon.com/512/272/272525.png" alt="coin" style="width:18px;height:18px;vertical-align:middle;margin-right:4px;"> 150';
+            }
+        }
+
+        // ===== ПРОМОКОД =====
+        async function redeemPromo() {
+            const input = document.getElementById('promoInput');
+            const status = document.getElementById('promoStatus');
+            const code = input.value.trim().toUpperCase();
+
+            if (!code) {
+                status.textContent = 'Промокодты енгізіңіз';
+                status.className = 'promo-status error';
+                return;
+            }
+
+            status.textContent = 'Тексерілуде...';
+            status.className = 'promo-status';
+
+            try {
+                const res = await apiFetch('/api/v1/promo', {
+                    method: 'POST',
+                    body: JSON.stringify({ code })
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    status.textContent = data.error || 'Қате шықты';
+                    status.className = 'promo-status error';
+                    return;
+                }
+
+                // Успех
+                const oldBal = userBalance;
+                userBalance = data.new_balance;
+                animateValue('user-balance', oldBal, userBalance, 800);
+
+                status.textContent = `+${data.coins_earned.toLocaleString('ru-RU')} монета есептелді! ✓`;
+                status.className = 'promo-status success';
+                input.value = '';
+            } catch (e) {
+                status.textContent = 'Серверде қате шықты';
+                status.className = 'promo-status error';
+            }
+        }
+
+        // Enter в поле промокода
         document.addEventListener('DOMContentLoaded', () => {
             loadBalance();
             loadSidebarAvatar();
+            loadDailyStatus();
+
+            document.getElementById('promoInput').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') redeemPromo();
+            });
         });
+
 
         function animateValue(id, start, end, duration) {
             let range = end - start; let current = start;

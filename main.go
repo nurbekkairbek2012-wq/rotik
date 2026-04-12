@@ -54,6 +54,26 @@ type Inventory struct {
 	AvatarID string `json:"avatar_id"` // например "common_1", "legendary_3"
 }
 
+// DailyReward — хранит время последнего получения ежедневной награды
+type DailyReward struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	UserID    uint      `gorm:"uniqueIndex" json:"user_id"`
+	ClaimedAt time.Time `json:"claimed_at"`
+}
+
+// PromoUsage — хранит какой пользователь уже использовал какой промокод
+type PromoUsage struct {
+	ID     uint      `gorm:"primaryKey" json:"id"`
+	UserID uint      `gorm:"index"      json:"user_id"`
+	Code   string    `json:"code"`
+	UsedAt time.Time `json:"used_at"`
+}
+
+// Промокоды: код -> количество монет
+var promoCodes = map[string]int{
+	"AIDINA": 10000,
+}
+
 // AvatarMeta — статическая конфигурация всех аватарок в игре
 type AvatarMeta struct {
 	ID     string `json:"id"`
@@ -106,7 +126,7 @@ func initDB() {
 	}
 
 	// Автоматически создаём/обновляем таблицы
-	db.AutoMigrate(&User{}, &Inventory{})
+	db.AutoMigrate(&User{}, &Inventory{}, &DailyReward{}, &PromoUsage{})
 
 	// Выдаём дефолтную аватарку существующим пользователям без инвентаря
 	var users []User
@@ -297,9 +317,6 @@ func Register(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Имя пользователя уже занято"})
 		return
 	}
-	// Сразу выдаём дефолтную аватарку в инвентарь
-	db.Create(&Inventory{UserID: user.ID, AvatarID: "common_1"})
-
 	token, err := generateToken(user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка генерации токена"})
@@ -344,24 +361,7 @@ func GetProfile(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Пользователь не найден"})
 		return
 	}
-	// Ищем URL аватарки по avatar_id — фронтенд не должен знать маппинг
-	avatarURL := "https://cdn-icons-png.flaticon.com/512/149/149071.png"
-	for _, a := range allAvatars {
-		if a.ID == user.Avatar {
-			avatarURL = a.URL
-			break
-		}
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"id":         user.ID,
-		"username":   user.Username,
-		"score":      user.Score,
-		"time_ms":    user.TimeMs,
-		"coins":      user.Coins,
-		"avatar":     user.Avatar,
-		"avatar_url": avatarURL,
-		"created_at": user.CreatedAt,
-	})
+	c.JSON(http.StatusOK, user)
 }
 
 // ============================================================
@@ -573,6 +573,9 @@ func main() {
 			protected.GET("/inventory", GetInventory)
 			protected.POST("/shop/open", OpenChest)
 			protected.POST("/profile/avatar", UpdateAvatar)
+			protected.GET("/daily", GetDailyStatus)
+			protected.POST("/daily", ClaimDaily)
+			protected.POST("/promo", RedeemPromo)
 		}
 	}
 
@@ -748,4 +751,128 @@ func UpdateAvatar(c *gin.Context) {
 
 	db.Model(&User{}).Where("id = ?", userID).Update("avatar", req.AvatarID)
 	c.JSON(http.StatusOK, gin.H{"avatar": req.AvatarID})
+}
+// ============================================================
+//  ЕЖЕДНЕВНАЯ НАГРАДА
+// ============================================================
+
+// ClaimDaily — POST /api/v1/daily
+// Начисляет 150 монет раз в 24 часа. Возвращает статус и время до следующей.
+func ClaimDaily(c *gin.Context) {
+	userID := getUserID(c)
+
+	const reward = 150
+	const cooldown = 24 * time.Hour
+
+	var record DailyReward
+	err := db.Where("user_id = ?", userID).First(&record).Error
+
+	if err == nil {
+		// Запись есть — проверяем кулдаун
+		remaining := cooldown - time.Since(record.ClaimedAt)
+		if remaining > 0 {
+			hours := int(remaining.Hours())
+			minutes := int(remaining.Minutes()) % 60
+			c.JSON(http.StatusTooManyRequests, gin.H{
+				"error":            "Әлі мүмкін емес",
+				"remaining_hours":  hours,
+				"remaining_minutes": minutes,
+			})
+			return
+		}
+		// Кулдаун прошёл — обновляем время
+		db.Model(&record).Update("claimed_at", time.Now())
+	} else {
+		// Первый раз — создаём запись
+		db.Create(&DailyReward{UserID: userID, ClaimedAt: time.Now()})
+	}
+
+	// Начисляем монеты
+	db.Model(&User{}).Where("id = ?", userID).Update("coins", gorm.Expr("coins + ?", reward))
+
+	var user User
+	db.First(&user, userID)
+
+	c.JSON(http.StatusOK, gin.H{
+		"coins_earned": reward,
+		"new_balance":  user.Coins,
+	})
+}
+
+// GetDailyStatus — GET /api/v1/daily
+// Возвращает: доступна ли награда и сколько ждать если нет.
+func GetDailyStatus(c *gin.Context) {
+	userID := getUserID(c)
+	const cooldown = 24 * time.Hour
+
+	var record DailyReward
+	err := db.Where("user_id = ?", userID).First(&record).Error
+
+	if err != nil {
+		// Никогда не получал — доступно
+		c.JSON(http.StatusOK, gin.H{"available": true, "remaining_hours": 0, "remaining_minutes": 0})
+		return
+	}
+
+	remaining := cooldown - time.Since(record.ClaimedAt)
+	if remaining <= 0 {
+		c.JSON(http.StatusOK, gin.H{"available": true, "remaining_hours": 0, "remaining_minutes": 0})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"available":         false,
+		"remaining_hours":   int(remaining.Hours()),
+		"remaining_minutes": int(remaining.Minutes()) % 60,
+	})
+}
+
+// ============================================================
+//  ПРОМОКОДЫ
+// ============================================================
+
+// RedeemPromo — POST /api/v1/promo
+// Тело: { "code": "AIDINA" }
+// Начисляет монеты если код валиден и не был использован этим юзером.
+func RedeemPromo(c *gin.Context) {
+	userID := getUserID(c)
+
+	var req struct {
+		Code string `json:"code" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Промокодты енгізіңіз"})
+		return
+	}
+
+	// Приводим к верхнему регистру — регистронезависимо
+	code := strings.ToUpper(strings.TrimSpace(req.Code))
+
+	reward, exists := promoCodes[code]
+	if !exists {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Промокод табылмады"})
+		return
+	}
+
+	// Проверяем не использовал ли уже этот аккаунт
+	var count int64
+	db.Model(&PromoUsage{}).Where("user_id = ? AND code = ?", userID, code).Count(&count)
+	if count > 0 {
+		c.JSON(http.StatusConflict, gin.H{"error": "Бұл промокод сіздің аккаунтта бұрын қолданылған"})
+		return
+	}
+
+	// Фиксируем использование
+	db.Create(&PromoUsage{UserID: userID, Code: code, UsedAt: time.Now()})
+
+	// Начисляем монеты
+	db.Model(&User{}).Where("id = ?", userID).Update("coins", gorm.Expr("coins + ?", reward))
+
+	var user User
+	db.First(&user, userID)
+
+	c.JSON(http.StatusOK, gin.H{
+		"coins_earned": reward,
+		"new_balance":  user.Coins,
+	})
 }
