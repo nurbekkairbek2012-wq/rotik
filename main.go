@@ -72,6 +72,7 @@ type PromoUsage struct {
 // Промокоды: код -> количество монет
 var promoCodes = map[string]int{
 	"AIDINA": 10000,
+	"KENESARY": 100000,
 }
 
 // AvatarMeta — статическая конфигурация всех аватарок в игре
@@ -317,8 +318,6 @@ func Register(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Имя пользователя уже занято"})
 		return
 	}
-	// Даём стартовую аватарку common_1 сразу в инвентарь
-	db.Create(&Inventory{UserID: user.ID, AvatarID: "common_1"})
 	token, err := generateToken(user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка генерации токена"})
