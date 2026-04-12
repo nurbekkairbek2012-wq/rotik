@@ -404,7 +404,7 @@
                 <span class="badge new">Жаңа</span>
                 <img src="щщщ.webp" alt="Халық көтерілісі" class="bg-img">
                 <div class="game-info">
-                    <h3>Халық көтерілісі</h3>
+                    <h3>Ақмола көтерілісі</h3>
                     <p>Кенесары ханның жорығы</p>
                 </div>
             </div>
@@ -445,12 +445,27 @@
         }
 
         function startGame(modeId) {
-            document.body.style.opacity = '0';
-            setTimeout(() => {
-                // Пока play.html не готов — направляем на викторину
-                window.location.href = 'maingame1.html';
-            }, 500);
+    // Добавляем эффект исчезновения
+    document.body.style.opacity = '0';
+    document.body.style.transition = 'opacity 0.5s';
+
+    setTimeout(() => {
+        // Проверяем, какой режим был нажат
+        switch (modeId) {
+            case 'pvp':
+                window.location.href = 'pvp_game.html'; // Файл для Жекпе-жек
+                break;
+            case 'uprising':
+                window.location.href = 'godotrules.html'; // Файл для Көтеріліс
+                break;
+            case 'quiz':
+                window.location.href = 'quiz_game.html'; // Файл для Сұрақ-жауап
+                break;
+            default:
+                window.location.href = 'maingame1.html'; // Файл по умолчанию
         }
+    }, 500);
+}
     </script>
 </body>
 </html>

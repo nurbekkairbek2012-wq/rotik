@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ақмола бекінісі: Барлау - Shadow of the Steppe</title>
+    
+    <script src="utils.js"></script>
+    <script>requireAuth();</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Базовые стили */
+        :root {
+            --accent-gold: #D4AF37;
+            --accent-blue: #3b82f6; /* Добавлен синий акцент для точек */
+            --accent-glow: rgba(212, 175, 55, 0.4);
+            --bg-base: #0a0f16;
+            --glass-bg: rgba(20, 25, 35, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
+            --success: #10b981;
+            --radius-lg: 24px;
+            --radius-md: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(212, 175, 55, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(30, 58, 138, 0.1), transparent 25%);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+        }
+
+        /* Сайдбар - 1 в 1 как в оригинале */
+        .sidebar {
+            width: 90px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 0;
+            justify-content: space-between;
+            z-index: 50;
+            border-right: 1px solid var(--glass-border);
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .nav-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            opacity: 0.6;
+        }
+
+        .nav-btn img {
+            width: 24px;
+            height: 24px;
+            filter: invert(1);
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .profile-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-gold);
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        /* Основной контент */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 40px 60px;
+            position: relative;
+        }
+
+        .main-content::-webkit-scrollbar { width: 6px; }
+        .main-content::-webkit-scrollbar-track { background: transparent; }
+        .main-content::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 10px; }
+        .main-content::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, 0.6); }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .header-title {
+            font-family: 'Cinzel', serif;
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+        }
+
+        /* Стили для страницы правил */
+        .rules-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            animation: fadeIn 0.8s ease-out;
+            padding-bottom: 40px;
+        }
+
+        .game-title-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .game-title-header h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 42px;
+            color: var(--accent-gold);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .game-title-header p {
+            color: var(--text-muted);
+            font-size: 18px;
+        }
+
+        .rules-content {
+            padding: 40px;
+            border-radius: var(--radius-lg);
+            margin-bottom: 40px;
+        }
+
+        .rule-block {
+            margin-bottom: 30px;
+        }
+
+        .rule-block:last-child {
+            margin-bottom: 0;
+        }
+
+        .rule-block h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 22px;
+            color: #fff;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .rule-block h3::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--accent-gold);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-gold);
+        }
+
+        .rule-block p {
+            color: var(--text-muted);
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 10px;
+        }
+
+        .highlight {
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+        
+        .highlight-blue {
+            color: var(--accent-blue);
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+
+        /* Кнопка старта */
+        .start-action {
+            text-align: center;
+            margin-top: 40px;
+            padding-bottom: 20px;
+        }
+
+        .btn-start-game {
+            background: linear-gradient(135deg, var(--accent-gold) 0%, #B8860B 100%);
+            color: #000;
+            border: none;
+            padding: 18px 48px;
+            font-size: 20px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .btn-start-game:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(212, 175, 55, 0.6);
+        }
+
+        .text-danger {
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar glass">
+        <div class="nav-items">
+            <a href="profile.html" style="display: block; line-height: 0;">
+                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" id="sidebarAvatar" class="profile-avatar" title="Профиль" alt="Аватар">
+            </a>
+        </div>
+        <div class="nav-items">
+            <a href="main.html" class="nav-btn" title="Басты бет"><img src="https://cdn-icons-png.flaticon.com/512/1946/1946436.png" alt="Home"></a>
+            <a href="shop.html" class="nav-btn" title="Дүкен"><img src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png" alt="Shop"></a>
+            <a href="leaderboard.html" class="nav-btn" title="Рейтинг"><img src="https://cdn-icons-png.flaticon.com/512/3112/3112946.png" alt="Leaderboard"></a>
+        </div>
+        <div class="nav-items">
+            <a href="settings.html" class="nav-btn" title="Баптаулар"><img src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png" alt="Settings"></a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        
+        <header class="header">
+            <h1 class="header-title">Shadow of the Steppe</h1>
+        </header>
+
+        <div class="rules-wrapper">
+            <div class="game-title-header">
+                <h2>Ақмола бекінісі: Барлау</h2>
+                <p>Стратегиялық маңызды нүктелерді анықтау</p>
+            </div>
+
+            <div class="rules-content glass">
+                
+                <div class="rule-block">
+                    <h3>Ойын туралы</h3>
+                    <p>Бұл режимде сіз 1838 жылғы тарихи Ақмола шайқасының алдындағы барлаушы рөлін атқарасыз. Кенесары ханның әскеріне шабуылды сәтті бастау үшін жау бекінісінің сызбасын зерттеп, негізгі нысандарды анықтау қажет.</p>
+                </div>
+
+                <div class="rule-block">
+                    <h3>Тапсырма</h3>
+                    <p>Алдыңызда Ақмола бекінісінің мини-картасы ашылады. Сіздің басты мақсатыңыз — картада жасырылған <span class="highlight-blue">3 негізгі көк нүктені</span> тауып басу. Олар көзге бірден түспеуі мүмкін, сондықтан картаны мұқият зерттеңіз.</p>
+                </div>
+
+                <div class="rule-block">
+                    <h3>Ақпарат және Сыйақы</h3>
+                    <p>Әрбір табылған көк нүктені басқан кезде, сол тарихи орын туралы (мысалы, қару-жарақ қоймасы, күзет мұнарасы немесе сауда нүктесі) арнайы ақпараттық терезе ашылады.</p>
+                    <p>Бұл тек тарихи білім ғана емес — әр табылған нүкте үшін сіздің қазынаңызға <span class="highlight">200 монета</span> қосылады! Барлық 3 нүктені тапқан жағдайда жалпы <span class="highlight">600 монета</span> қанжығаңызға байланады.</p>
+                </div>
+
+                <div class="rule-block">
+                    <h3>Маңызды ескерту</h3>
+                    <p>
+                        Барлық үш нүктені таппайынша барлау операциясы аяқталмайды. Егер барлық нүктені таппай картадан шығып кетсеңіз, жинаған монеталарыңыз <span class="text-danger">сақталмайды</span>. Мұқият болып, істі соңына дейін жеткізіңіз!
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="start-action">
+                <button class="btn-start-game" onclick="startMapMission()">Картаны ашу</button>
+            </div>
+            
+        </div>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', loadSidebarAvatar);
+
+        function startMapMission() {
+            // Эффект плавного перехода к самой игре (мини-карте)
+            document.body.style.transition = 'opacity 0.5s ease';
+            document.body.style.opacity = '0';
+            
+            setTimeout(() => {
+                console.log("Запуск мини-карты Ақмола бекінісі...");
+                 // Замени 'aqmola_map.html' на название твоего файла с самой мини-картой
+                 window.location.href = 'aqmola_map.html'; 
+            }, 500);
+        }
+    </script>
+</body>
+</html>
