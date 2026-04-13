@@ -576,14 +576,18 @@ func main() {
 	initDB()
 	r := gin.Default()
 
-	// 1. Главная страница
-    r.StaticFile("/", "./login.html")
-
-    // 2. Ловушка для всех остальных файлов (CSS, JS, другие HTML)
+	// 2. Ловушка для всех остальных файлов
     r.NoRoute(func(c *gin.Context) {
         path := c.Request.URL.Path
-        // Пытаемся отдать файл из корня проекта
-        c.File("." + path)
+
+        // Тот самый IF: если запрашивают index.html (или нужные для игры картинки/стили/скрипты) — отмена переадресации, отдаем файл
+        if path == "/index.html" || strings.HasSuffix(path, ".css") || strings.HasSuffix(path, ".js") || strings.HasSuffix(path, ".png") || strings.HasSuffix(path, ".jpeg") || strings.HasSuffix(path, ".wasm") {
+            c.File("." + path)
+            return
+        }
+
+        // Во всех остальных случаях (любая другая ссылка) — принудительно перенаправляем на регистрацию/логин
+        c.Redirect(http.StatusFound, "/")
     })
 
 	r.Use(func(c *gin.Context) {

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ақмола бекінісін алу - Shadow of the Steppe</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --accent-gold: #D4AF37;
+            --accent-glow: rgba(212, 175, 55, 0.4);
+            --bg-base: #0a0f16;
+            --glass-bg: rgba(20, 25, 35, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
+            --success: #10b981;
+            --radius-lg: 24px;
+            --radius-md: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(212, 175, 55, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(30, 58, 138, 0.1), transparent 25%);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center; /* Центрируем контент */
+        }
+
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+        }
+
+        /* Основной контент (теперь без сайдбара, по центру) */
+        .main-content {
+            flex: 1;
+            max-width: 1000px; /* Ограничиваем ширину для удобства чтения */
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 40px 20px;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .main-content::-webkit-scrollbar { width: 6px; }
+        .main-content::-webkit-scrollbar-track { background: transparent; }
+        .main-content::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 10px; }
+        .main-content::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, 0.6); }
+
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.6s ease-out;
+            text-align: center;
+        }
+
+        .header-title {
+            font-family: 'Cinzel', serif;
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+        }
+
+        /* --- Стили для статьи --- */
+        .article-wrapper {
+            width: 100%;
+            animation: fadeIn 0.8s ease-out;
+            padding-bottom: 40px;
+        }
+
+        .article-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .article-header h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 38px;
+            color: var(--accent-gold);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1.3;
+        }
+
+        .article-header p {
+            color: var(--text-muted);
+            font-size: 18px;
+            font-style: italic;
+        }
+
+        .article-content {
+            padding: 40px;
+            border-radius: var(--radius-lg);
+            margin-bottom: 40px;
+        }
+
+        .text-block {
+            margin-bottom: 25px;
+        }
+
+        .text-block p {
+            color: var(--text-muted);
+            font-size: 17px;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            text-indent: 30px; /* Красная строка */
+        }
+
+        .text-block p:last-child {
+            margin-bottom: 0;
+        }
+
+        .highlight {
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        /* Блоки для картинок */
+        .image-container {
+            width: 100%;
+            margin: 30px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .article-image {
+            width: 100%;
+            max-height: 450px;
+            object-fit: cover;
+            border-radius: var(--radius-md);
+            border: 2px solid var(--accent-gold);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+        }
+
+        .article-image:hover {
+            transform: scale(1.02);
+        }
+
+        .image-caption {
+            margin-top: 12px;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-style: italic;
+            text-align: center;
+        }
+
+        /* Кнопка возврата */
+        .action-container {
+            text-align: center;
+            margin-top: 20px;
+            padding-bottom: 40px;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid var(--accent-gold);
+            padding: 15px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-back:hover {
+            background: rgba(212, 175, 55, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--accent-glow);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+
+    <main class="main-content">
+        
+        <header class="header">
+            <h1 class="header-title">Shadow of the Steppe</h1>
+        </header>
+
+        <div class="article-wrapper">
+            <div class="article-header">
+                <h2>Ақмола бекінісін алу</h2>
+                <p>1/3 Көк негізгі нүкте</p>
+            </div>
+
+            <div class="article-content glass">
+                
+                <div class="text-block">
+                    <p>Сәлем сен 3 көк нүктенің 1-еуін таптың. Қазіргі станциян <span class="highlight">Ақмола бекінісі.</span></p>
+                </div>
+
+                <div class="image-container">
+                    <img src="image.png" alt="Ақмола бекінісі" class="article-image">
+                    <span class="image-caption">Сен осы жердесің</span>
+                </div>
+
+                <div class="text-block">
+                    <p>Кенесары Қасымұлы бастаған қазақ халқының ұлт-азаттық көтерілісі тарихындағы ең жарқын әрі маңызды оқиғалардың бірі — <span class="highlight">1838 жылғы Ақмола бекінісіне жасалған шабуыл</span>. Патша үкіметінің Сарыарқа төсіндегі ең мықты әскери-әкімшілік тірегі болған бұл қамал қазақ жерлерін отарлау саясатының басты құралына айналған еді. Кенесары хан бұл бекіністі жою арқылы Ресей империясының даладағы ықпалын әлсіретіп, бытыраңқы қазақ руларын бір тудың астына біріктіруді басты мақсат етіп қойды.Ақмола бекінісі мықты қорғалған болатын. Оның айналасында терең орлар қазылып, биік дуалдар тұрғызылған еді. Ішінде зеңбіректермен қаруланған тұрақты орыс гарнизоны және сұлтан Қоңырқұлжа Құдаймендіұлы бастаған патша үкіметіне берілген жергілікті жасақтар орналасты. Дегенмен, Кенесарының әскери таланты мен қазақ батырларының асқан ерлігі бұл кедергілерді бұзып өтуге қауқарлы болды. Шабуылға шамамен <span class="highlight">12 мыңға жуық</span> қазақ сарбазы қатысты.</p>
+                    <p>1838 жылдың 7 тамызында таңсәріде басталған шабуыл өте қилы әрі қанды болды. Кенесарының садақшылары мен найзагерлері жаудың оқ боранына қарамастан алға ұмтылды. Басығара батыр бастаған жасақ қорғанның орларынан өтіп, алғашқылардың бірі болып қабырғаға бұзып кірді. Осы ұрыста Басығара батыр ерлікпен қаза тапты. Бұл жағдай сарбаздардың рухын түсірмеді, керісінше, Ағыбай, Иман (Амангелді батырдың атасы), Бұғыбай, Наурызбай батырлар шабуылды одан әрі үдетті.</p>
+                </div>
+
+                <div class="image-container">
+                    <img src="Без названия (3).jpeg" alt="Кенесары жасақтарының шабуылы" class="article-image">
+                    <span class="image-caption">ХІХ ғасырдағы Ақмола бекінісінің көрінісі мен қорғаныс бекіністері</span>
+                </div>
+
+                <div class="text-block">
+                    <p>Түнге қарай қазақ жасақтары арнайы дайындалған садақ оқтарының басына жанғыш заттар байлап, бекініс ішіне атты. Ағаштан салынған қамал лезде отқа оранып, іштегі гарнизон арасында дүрбелең басталды. Осы сәтті пайдаланған Кенесары әскері бекіністі толықтай басып алды. Патша әскерінің аман қалған бөлігі мен Қоңырқұлжа түн қараңғылығын жамылып әрең қашып құтылды.</p>
+                    <p>Ақмола бекінісін алудың <span class="highlight">тарихи маңызы</span> өте зор болды. Бұл жеңіс Кенесарының қолбасшылық даңқын бүкіл қазақ даласына таратты. Халықтың рухы көтеріліп, көтеріліске жаңа рулар келіп қосыла бастады. Сонымен қатар, бұл оқиға патша үкіметіне қазақ халқының өз тәуелсіздігі үшін соңғы тамшы қаны қалғанша күресуге дайын екенін айқын көрсеткен тарихи сәт еді.</p>
+                </div>
+
+            </div>
+
+            <div class="action-container">
+                <button class="btn-back" onclick="window.history.back()">Артқа қайту</button>
+            </div>
+            
+        </div>
+
+    </main>
+
+</body>
+</html>
