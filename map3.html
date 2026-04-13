@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ақмола бекінісі: Сарбаздар казармасы - Shadow of the Steppe</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --accent-gold: #D4AF37;
+            --accent-glow: rgba(212, 175, 55, 0.4);
+            --bg-base: #0a0f16;
+            --glass-bg: rgba(20, 25, 35, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --radius-lg: 24px;
+            --radius-md: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(212, 175, 55, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(30, 58, 138, 0.1), transparent 25%);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+
+        .main-content {
+            flex: 1;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 40px 20px;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .main-content::-webkit-scrollbar { width: 6px; }
+        .main-content::-webkit-scrollbar-track { background: transparent; }
+        .main-content::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 10px; }
+
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .header-title {
+            font-family: 'Cinzel', serif;
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+        }
+
+        .article-wrapper {
+            width: 100%;
+            animation: fadeIn 0.8s ease-out;
+            padding-bottom: 40px;
+        }
+
+        .article-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .article-header h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 32px;
+            color: var(--accent-gold);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .article-content {
+            padding: 40px;
+            border-radius: var(--radius-lg);
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            margin-bottom: 40px;
+        }
+
+        .text-block { margin-bottom: 25px; }
+        .text-block p {
+            color: var(--text-muted);
+            font-size: 17px;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            text-indent: 30px;
+        }
+
+        .highlight { color: var(--accent-gold); font-weight: 600; }
+
+        .image-container {
+            width: 100%;
+            margin: 30px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .article-image {
+            width: 100%;
+            max-height: 450px;
+            object-fit: cover;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--accent-gold);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .image-caption {
+            margin-top: 12px;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-style: italic;
+        }
+
+        .action-container { text-align: center; margin-top: 20px; padding-bottom: 40px; }
+
+        .btn-back {
+            background: transparent;
+            color: #fff;
+            border: 1px solid var(--accent-gold);
+            padding: 15px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-back:hover {
+            background: rgba(212, 175, 55, 0.2);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <main class="main-content">
+        <header class="header">
+            <h1 class="header-title">Shadow of the Steppe</h1>
+        </header>
+
+        <div class="article-wrapper">
+            <div class="article-header">
+                <h2>Ақмола бекінісі: Сарбаздар казармасы</h2>
+                <p>3/3 Көк негізгі нүкте</p>
+            </div>
+
+            <div class="article-content">
+                <div class="text-block">
+                    <p>Тамаша! Сен барлық 3 көк нүктені таптың. Соңғы станцияң — <span class="highlight">Патша әскерінің казармалары.</span></p>
+                    <p>Казармалар бекіністің әскери қуатының өзегі болды. Мұнда гарнизонның негізгі күштері, атты әскер мен жаяу сарбаздар орналасты. Бекіністі қоршау кезінде бұл ғимараттарды бейтараптандыру өте маңызды болды, себебі жау әскері дәл осы жерден жиналып, қарсы шабуылға шығатын.</p>
+                </div>
+
+                <div class="image-container">
+                    <img src="Снимок экрана 2026-04-13 213417.png" alt="Казармалар" class="article-image">
+                    <span class="image-caption">Сен осы жердесің</span>
+                </div>
+
+                <div class="text-block">
+                    <p>Кенесары ханның тактикасы бойынша, шабуылдың алғашқы минуттарында-ақ казармалардан шығатын жолдарды жауып тастау немесе жауды іште қамап ұстау қажет болды. Сарбаздар түнде ұйқыда жатқанда басталған тұтқиылдан шабуыл патша әскерінің ес жиюына мұрша бермеді. <span class="highlight">Ағыбай батырдың</span> жасақтары казарма маңындағы күзет бекеттерін бірінші болып жойды.</p>
+                    <p>Казармаларды алу — бекіністің толық құлауын білдірді. Жауынгерлердің қару-жарақ қоймалары мен оқ-дәрі сақталатын орындары да осы маңда болғандықтан, оларды бақылауға алу көтерілісшілердің жеңісін бекіте түсті. Бұл — отарлаушы әскердің Сарыарқадағы ең үлкен базасының талқандалған сәті еді.</p>
+                </div>
+
+                <div class="image-container">
+                    <img src="victory_scene.jpeg" alt="Жеңіс сәті" class="article-image">
+                    <span class="image-caption">Ақмола бекінісіндегі көтерілісшілердің жеңісі</span>
+                </div>
+
+                <div class="text-block">
+                    <p>Осымен сен Ақмола бекінісін алу тарихының барлық негізгі кезеңдерінен өттің. Казармалардың құлауымен бекініс Кенесары ханның қолына толық көшті. Бұл жеңіс қазақ даласындағы азаттық рухын асқақтатып, империяның отарлау саясатын бірнеше жылға тежеді. Сен барлық ақпаратты жинадың!</p>
+                </div>
+            </div>
+
+            <div class="action-container">
+                <button class="btn-back" onclick="returnToIndex()">Артқа қайту</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function returnToIndex() {
+            document.body.style.opacity = '0';
+            setTimeout(function() {
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    window.location.href = 'index.html';
+                }
+                window.close();
+            }, 500);
+        }
+    </script>
+</body>
+</html>
