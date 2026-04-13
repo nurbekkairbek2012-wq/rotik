@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тактикалық Шайқас - Shadow of the Steppe</title>
+    
+    <script src="utils.js"></script>
+    <script>requireAuth();</script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --accent-gold: #D4AF37;
+            --accent-glow: rgba(212, 175, 55, 0.4);
+            --bg-base: #0a0f16;
+            --glass-bg: rgba(20, 25, 35, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
+            --success: #10b981;
+            --radius-lg: 24px;
+            --radius-md: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(212, 175, 55, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(30, 58, 138, 0.1), transparent 25%);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+        }
+
+        /* Сайдбар */
+        .sidebar {
+            width: 90px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 0;
+            justify-content: space-between;
+            z-index: 50;
+            border-right: 1px solid var(--glass-border);
+        }
+
+        .nav-items {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .nav-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            opacity: 0.6;
+        }
+
+        .nav-btn img {
+            width: 24px;
+            height: 24px;
+            filter: invert(1);
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .profile-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-gold);
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        /* Основной контент */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 40px 60px;
+            position: relative;
+        }
+
+        .main-content::-webkit-scrollbar { width: 6px; }
+        .main-content::-webkit-scrollbar-track { background: transparent; }
+        .main-content::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 10px; }
+        .main-content::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, 0.6); }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .header-title {
+            font-family: 'Cinzel', serif;
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+        }
+
+        .rules-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            animation: fadeIn 0.8s ease-out;
+            padding-bottom: 40px;
+        }
+
+        .game-title-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .game-title-header h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 42px;
+            color: var(--accent-gold);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .game-title-header p {
+            color: var(--text-muted);
+            font-size: 18px;
+        }
+
+        .rules-content {
+            padding: 40px;
+            border-radius: var(--radius-lg);
+            margin-bottom: 40px;
+        }
+
+        .rule-block {
+            margin-bottom: 30px;
+        }
+
+        .rule-block:last-child {
+            margin-bottom: 0;
+        }
+
+        .rule-block h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 22px;
+            color: #fff;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .rule-block h3::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--accent-gold);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-gold);
+        }
+
+        .rule-block p {
+            color: var(--text-muted);
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 10px;
+        }
+
+        .rule-block ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+
+        .rule-block ul li {
+            color: var(--text-muted);
+            font-size: 16px;
+            line-height: 1.7;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .rule-block ul li::before {
+            content: '—';
+            position: absolute;
+            left: -20px;
+            color: var(--accent-gold);
+        }
+
+        .highlight {
+            color: var(--accent-gold);
+            font-weight: 600;
+        }
+
+        .start-action {
+            text-align: center;
+            margin-top: 40px;
+            padding-bottom: 20px;
+        }
+
+        .btn-start-game {
+            background: linear-gradient(135deg, var(--accent-gold) 0%, #B8860B 100%);
+            color: #000;
+            border: none;
+            padding: 18px 48px;
+            font-size: 20px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .btn-start-game:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(212, 175, 55, 0.6);
+        }
+        
+        .text-danger {
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        /* Классы для кнопок управления */
+        .key-badge {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar glass">
+        <div class="nav-items">
+            <a href="profile.html" style="display: block; line-height: 0;">
+                <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" id="sidebarAvatar" class="profile-avatar" title="Профиль" alt="Аватар">
+            </a>
+        </div>
+        <div class="nav-items">
+            <a href="main.html" class="nav-btn" title="Басты бет"><img src="https://cdn-icons-png.flaticon.com/512/1946/1946436.png" alt="Home"></a>
+            <a href="shop.html" class="nav-btn" title="Дүкен"><img src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png" alt="Shop"></a>
+            <a href="leaderboard.html" class="nav-btn" title="Рейтинг"><img src="https://cdn-icons-png.flaticon.com/512/3112/3112946.png" alt="Leaderboard"></a>
+        </div>
+        <div class="nav-items">
+            <a href="settings.html" class="nav-btn" title="Баптаулар"><img src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png" alt="Settings"></a>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        
+        <header class="header">
+            <h1 class="header-title">Shadow of the Steppe</h1>
+        </header>
+
+        <div class="rules-wrapper">
+            <div class="game-title-header">
+                <h2>Тактикалық Шайқас</h2>
+                <p>Кенесары хан мен Патша офицерінің жекпе-жегі</p>
+            </div>
+
+            <div class="rules-content glass">
+                
+                <div class="rule-block">
+                    <h3>Ойын туралы</h3>
+                    <p>Бұл режимде сіз досыңызбен бірге бір пернетақтада (1v1) нағыз тактикалық шайқасқа қатысасыз. Жеңіске жету үшін тек жылдамдық емес, айла мен стратегия қажет.</p>
+                </div>
+
+                <div class="rule-block">
+                    <h3>Басқару жүйесі</h3>
+                    <ul>
+                        <li><span class="highlight">1-Ойыншы (Кенесары хан):</span> Жүру: <span class="key-badge">W,A,S,D</span> | Қылыш: <span class="key-badge">F</span> | Садақ: <span class="key-badge">G</span> | Қалқан: <span class="key-badge">H</span> | Жылдам ұмтылу (Dash): <span class="key-badge">E</span></li>
+                        <li><span class="highlight">2-Ойыншы (Патша офицері):</span> Жүру: <span class="key-badge">Стрелкалар</span> | Қылыш: <span class="key-badge">K</span> | Садақ: <span class="key-badge">L</span> | Қалқан: <span class="key-badge">O</span> | Жылдам ұмтылу: <span class="key-badge">P</span></li>
+                    </ul>
+                </div>
+
+                <div class="rule-block">
+                    <h3>Тактика және Механика</h3>
+                    <p>Аренада мынадай ерекшеліктер бар:</p>
+                    <ul>
+                        <li><span class="highlight">Қуат (Stamina):</span> Қалқанды шексіз ұстай алмайсыз. Қалқан ұстағанда көк жолақ азаяды, қуат бітсе қалқан сынып қалады.</li>
+                        <li><span class="highlight">Отты тұзақтар:</span> Карта ортасындағы оттар мезгіл-мезгіл жанып-өшеді. Оған түсіп кетсеңіз, жаныңыз азаяды. Қарсыласты қылышпен ұрып, отқа итеріп жіберуге болады!</li>
+                        <li><span class="highlight">Бұталар (Засада):</span> Жасыл аймақтарға кірсеңіз жасырынасыз. Кенеттен шығып шабуылдау үшін таптырмас орын.</li>
+                    </ul>
+                </div>
+
+                <div class="rule-block">
+                    <h3>Бонустар мен Супер КОМБО</h3>
+                    <p>Кездейсоқ уақытта картада бонустар пайда болады: <span class="highlight">Аптечка (Крест)</span> жаныңызды көбейтсе, <span class="highlight">Қуат (Найдзағай)</span> уақытша жылдамдықты арттырады.</p>
+                    <p>🔥 <span class="highlight">ҚҰПИЯ СОҚҚЫ:</span> Егер сізде қуат жеткілікті болса (50+), <b>Жылдам ұмтылу мен Қылышты бірге басыңыз</b> (<span class="key-badge">E + F</span> немесе <span class="key-badge">P + K</span>). Ойыншы 360 градусқа айналып, өте күшті соққы жасайды және қарсыласты алысқа ұшырып жібереді!</p>
+                </div>
+
+            </div>
+
+            <div class="start-action">
+                <button class="btn-start-game" onclick="startBattle()">Шайқасты бастау</button>
+            </div>
+            
+        </div>
+
+    </main>
+
+    <script>
+        // Егер utils.js ішінде функция болса ғана шақырылады, қате шықпас үшін тексеру
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof loadSidebarAvatar === 'function') {
+                loadSidebarAvatar();
+            }
+        });
+
+        function startBattle() {
+            // Плавный переход к игре ооо.html
+            document.body.style.transition = 'opacity 0.5s ease';
+            document.body.style.opacity = '0';
+            
+            setTimeout(() => {
+                window.location.href = 'ооо.html'; // Твоя главная боевая арена
+            }, 500);
+        }
+    </script>
+</body>
+</html>
