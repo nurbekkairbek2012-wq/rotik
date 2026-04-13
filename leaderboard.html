@@ -21,18 +21,17 @@
             --glass-border: rgba(255, 255, 255, 0.08);
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
+            --rarity-common: #94a3b8;
+            --rarity-rare: #3b82f6;
+            --rarity-epic: #a855f7;
+            --rarity-legendary: #D4AF37;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
 
         body {
             background-color: var(--bg-base);
-            background-image: 
+            background-image:
                 radial-gradient(circle at 15% 50%, rgba(212, 175, 55, 0.08), transparent 25%),
                 radial-gradient(circle at 85% 30%, rgba(30, 58, 138, 0.1), transparent 25%);
             color: var(--text-main);
@@ -48,7 +47,7 @@
             border: 1px solid var(--glass-border);
         }
 
-        /* --- Сайдбар (Тот же дизайн) --- */
+        /* Sidebar */
         .sidebar {
             width: 90px;
             height: 100vh;
@@ -59,54 +58,44 @@
             justify-content: space-between;
             z-index: 50;
             border-right: 1px solid var(--glass-border);
+            flex-shrink: 0;
         }
 
-        .nav-items {
-            display: flex;
-            flex-direction: column;
-            gap: 32px;
-            align-items: center;
-        }
+        .nav-items { display: flex; flex-direction: column; gap: 32px; align-items: center; }
 
         .nav-btn {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            opacity: 0.6;
+            width: 48px; height: 48px; border-radius: 14px;
+            display: flex; justify-content: center; align-items: center;
+            transition: all 0.3s ease; cursor: pointer; opacity: 0.6;
         }
 
         .nav-btn img { width: 24px; height: 24px; filter: invert(1); }
 
         .nav-btn:hover, .nav-btn.active {
-            opacity: 1;
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-2px);
+            opacity: 1; background: rgba(255,255,255,0.1); transform: translateY(-2px);
         }
 
         .profile-avatar-btn {
             width: 50px; height: 50px; border-radius: 50%;
-            border: 2px solid var(--accent-gold); cursor: pointer;
+            border: 2px solid var(--accent-gold); cursor: pointer; object-fit: cover;
+            transition: transform 0.3s;
         }
 
-        /* --- Контент --- */
+        /* Main */
         .main-content {
             flex: 1;
             display: flex;
             flex-direction: column;
             padding: 40px 60px;
-            position: relative;
+            overflow: hidden;
         }
 
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
+            margin-bottom: 36px;
+            flex-shrink: 0;
         }
 
         .header-title {
@@ -117,109 +106,336 @@
             -webkit-text-fill-color: transparent;
         }
 
-        /* --- Секция "Закрыто" --- */
-        .maintenance-container {
+        /* Page title */
+        .leaderboard-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+            flex-shrink: 0;
+        }
+
+        .leaderboard-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent-gold), #B8860B);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 0 20px var(--accent-glow);
+            flex-shrink: 0;
+        }
+
+        .leaderboard-title-block h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 26px;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+
+        .leaderboard-title-block p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* Table container */
+        .table-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .table-wrapper::-webkit-scrollbar { width: 5px; }
+        .table-wrapper::-webkit-scrollbar-track { background: transparent; }
+        .table-wrapper::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.3); border-radius: 10px; }
+
+        /* Loading / Error */
+        .state-center {
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            text-align: center;
+            justify-content: center;
+            gap: 16px;
         }
 
-        .lock-icon-wrapper {
+        .spinner {
+            width: 48px; height: 48px;
+            border: 3px solid rgba(212,175,55,0.2);
+            border-top-color: var(--accent-gold);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-text { color: var(--text-muted); font-size: 15px; }
+
+        /* Podium (top 3) */
+        .podium {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .podium-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            animation: fadeInUp 0.6s ease-out both;
+        }
+
+        .podium-item:nth-child(1) { animation-delay: 0.1s; }
+        .podium-item:nth-child(2) { animation-delay: 0s; }
+        .podium-item:nth-child(3) { animation-delay: 0.2s; }
+
+        .podium-avatar-wrap {
             position: relative;
-            margin-bottom: 30px;
         }
 
-        .lock-glow {
+        .podium-avatar {
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--rarity-common);
+            display: block;
+        }
+
+        .podium-avatar-wrap.rarity-rare .podium-avatar  { border-color: var(--rarity-rare); box-shadow: 0 0 14px rgba(59,130,246,0.6); }
+        .podium-avatar-wrap.rarity-epic .podium-avatar  { border-color: var(--rarity-epic); box-shadow: 0 0 14px rgba(168,85,247,0.6); }
+        .podium-avatar-wrap.rarity-legendary .podium-avatar { border-color: var(--rarity-legendary); box-shadow: 0 0 18px rgba(212,175,55,0.8); }
+
+        /* 1st place avatar is bigger */
+        .podium-item.place-1 .podium-avatar { width: 80px; height: 80px; }
+
+        .podium-crown {
             position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 200px; height: 200px;
-            background: var(--accent-gold);
-            filter: blur(80px);
-            opacity: 0.2;
-            animation: pulse 3s infinite;
+            top: -20px; left: 50%;
+            transform: translateX(-50%);
+            font-size: 22px;
+            filter: drop-shadow(0 0 8px rgba(212,175,55,0.9));
+            animation: crownBob 2s ease-in-out infinite;
         }
 
-        .lock-icon {
-            width: 120px;
-            height: 120px;
-            filter: drop-shadow(0 0 20px var(--accent-gold));
-            animation: float 4s ease-in-out infinite;
+        @keyframes crownBob {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-4px); }
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 0.1; transform: translate(-50%, -50%) scale(1); }
-            50% { opacity: 0.3; transform: translate(-50%, -50%) scale(1.2); }
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-        }
-
-        .maintenance-title {
+        .podium-rank {
             font-family: 'Cinzel', serif;
-            font-size: 48px;
-            margin-bottom: 15px;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .podium-item.place-1 .podium-rank { color: var(--accent-gold); font-size: 28px; }
+        .podium-item.place-2 .podium-rank { color: #94a3b8; }
+        .podium-item.place-3 .podium-rank { color: #cd7f32; }
+
+        .podium-name {
+            font-size: 13px;
+            font-weight: 600;
             color: #fff;
-            letter-spacing: 3px;
+            text-align: center;
+            max-width: 90px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        .maintenance-subtitle {
-            font-size: 18px;
-            color: var(--text-muted);
-            max-width: 500px;
-            line-height: 1.6;
-            margin-bottom: 40px;
-        }
-
-        .badge-status {
-            display: inline-block;
-            padding: 8px 24px;
-            background: rgba(212, 175, 55, 0.1);
-            border: 1px solid var(--accent-gold);
-            border-radius: 100px;
+        .podium-coins {
+            font-size: 13px;
+            font-weight: 700;
             color: var(--accent-gold);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .podium-base {
+            border-radius: 12px 12px 0 0;
+            width: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 0 8px;
+            font-family: 'Cinzel', serif;
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .podium-item.place-2 { order: 1; }
+        .podium-item.place-1 { order: 2; }
+        .podium-item.place-3 { order: 3; }
+
+        .base-1 { background: linear-gradient(180deg, rgba(212,175,55,0.25) 0%, rgba(212,175,55,0.05) 100%); border: 1px solid rgba(212,175,55,0.4); height: 90px; }
+        .base-2 { background: linear-gradient(180deg, rgba(148,163,184,0.2) 0%, rgba(148,163,184,0.04) 100%); border: 1px solid rgba(148,163,184,0.3); height: 65px; }
+        .base-3 { background: linear-gradient(180deg, rgba(205,127,50,0.2) 0%, rgba(205,127,50,0.04) 100%); border: 1px solid rgba(205,127,50,0.3); height: 50px; }
+
+        /* Table rows (rank 4-10) */
+        .rank-table {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .rank-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 20px;
+            border-radius: 14px;
+            background: rgba(20, 25, 35, 0.5);
+            border: 1px solid var(--glass-border);
+            transition: all 0.25s ease;
+            animation: fadeInUp 0.5s ease-out both;
+        }
+
+        .rank-row:hover {
+            background: rgba(30,38,52,0.7);
+            border-color: rgba(212,175,55,0.2);
+            transform: translateX(4px);
+        }
+
+        .rank-row.is-me {
+            border-color: rgba(212,175,55,0.45);
+            background: rgba(212,175,55,0.07);
+        }
+
+        .rank-number {
+            width: 28px;
+            font-family: 'Cinzel', serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .rank-avatar-wrap {
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .rank-avatar {
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--rarity-common);
+            display: block;
+        }
+
+        .rank-avatar-wrap.rarity-rare .rank-avatar  { border-color: var(--rarity-rare); box-shadow: 0 0 8px rgba(59,130,246,0.5); }
+        .rank-avatar-wrap.rarity-epic .rank-avatar  { border-color: var(--rarity-epic); box-shadow: 0 0 8px rgba(168,85,247,0.5); }
+        .rank-avatar-wrap.rarity-legendary .rank-avatar { border-color: var(--rarity-legendary); box-shadow: 0 0 10px rgba(212,175,55,0.6); }
+
+        .rank-name {
+            flex: 1;
+            font-weight: 600;
+            font-size: 15px;
+            color: #fff;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .rank-name .you-badge {
+            margin-left: 8px;
+            font-size: 11px;
+            background: rgba(212,175,55,0.2);
+            color: var(--accent-gold);
+            padding: 2px 8px;
+            border-radius: 100px;
+            border: 1px solid rgba(212,175,55,0.4);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .rank-coins {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--accent-gold);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+
+        .coin-icon { font-size: 16px; }
+
+        /* Divider between podium and table */
+        .section-label {
+            font-size: 12px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 2px;
-            font-size: 14px;
-            margin-bottom: 20px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            padding-left: 4px;
+            flex-shrink: 0;
         }
 
-        .btn-back {
-            padding: 16px 40px;
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #fff;
-            border-radius: 12px;
+        /* My rank panel at bottom */
+        .my-rank-panel {
+            flex-shrink: 0;
+            margin-top: 16px;
+            padding: 14px 20px;
+            border-radius: 14px;
+            border: 1px solid rgba(212,175,55,0.35);
+            background: rgba(212,175,55,0.07);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            animation: fadeInUp 0.6s ease-out 0.4s both;
+        }
+
+        .my-rank-panel .my-rank-label {
+            font-size: 13px;
+            color: var(--text-muted);
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
         }
 
-        .btn-back:hover {
-            background: rgba(255,255,255,0.05);
-            border-color: #fff;
+        .my-rank-panel .my-rank-pos {
+            font-family: 'Cinzel', serif;
+            font-size: 22px;
+            color: var(--accent-gold);
+            font-weight: 700;
+            margin-left: auto;
         }
 
-        /* Эффект шума/тумана */
-        .fog-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://www.transparenttextures.com/patterns/asfalt-dark.png');
-            opacity: 0.05;
-            pointer-events: none;
+        .my-rank-panel .my-rank-coins {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
         }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        .empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
     </style>
 </head>
 <body>
-
-    <div class="fog-overlay"></div>
 
     <nav class="sidebar glass">
         <div class="nav-items">
@@ -227,55 +443,198 @@
                 <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" id="sidebarAvatar" class="profile-avatar-btn" alt="Avatar">
             </a>
         </div>
-        
         <div class="nav-items">
             <a href="main.html" class="nav-btn" title="Басты бет"><img src="https://cdn-icons-png.flaticon.com/512/1946/1946436.png" alt="Home"></a>
             <a href="shop.html" class="nav-btn" title="Дүкен"><img src="https://cdn-icons-png.flaticon.com/512/1170/1170678.png" alt="Shop"></a>
-            <a href="#" class="nav-btn active" title="Рейтинг"><img src="https://cdn-icons-png.flaticon.com/512/3112/3112946.png" alt="Leaderboard"></a>
+            <a href="leaderboard.html" class="nav-btn active" title="Рейтинг"><img src="https://cdn-icons-png.flaticon.com/512/3112/3112946.png" alt="Leaderboard"></a>
         </div>
-
         <div class="nav-items">
-            <a href="#" class="nav-btn" title="Баптаулар"><img src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png" alt="Settings"></a>
+            <a href="settings.html" class="nav-btn" title="Баптаулар"><img src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png" alt="Settings"></a>
         </div>
     </nav>
 
     <main class="main-content">
-        <header class="header">
+        <header class="header" style="animation: fadeInDown 0.6s ease-out;">
             <h1 class="header-title">Shadow of the Steppe</h1>
         </header>
 
-        <div class="maintenance-container">
-            <div class="badge-status">Техникалық жұмыстар</div>
-            
-            <div class="lock-icon-wrapper">
-                <div class="lock-glow"></div>
-                <img src="https://cdn-icons-png.flaticon.com/512/2889/2889676.png" alt="Locked" class="lock-icon">
+        <div class="leaderboard-header">
+            <div class="leaderboard-icon">💰</div>
+            <div class="leaderboard-title-block">
+                <h2>Байлар тізімі</h2>
+                <p>Ең көп монета жинаған Топ-10 ойыншы</p>
+            </div>
+        </div>
+
+        <!-- Loading state -->
+        <div id="loadingState" class="state-center">
+            <div class="spinner"></div>
+            <p class="loading-text">Деректер жүктелуде...</p>
+        </div>
+
+        <!-- Error state -->
+        <div id="errorState" class="state-center" style="display:none;">
+            <div style="font-size:48px;">⚠️</div>
+            <p style="color:var(--text-muted);font-size:15px;" id="errorMsg">Қате шықты</p>
+        </div>
+
+        <!-- Content -->
+        <div id="leaderboardContent" style="display:none; flex:1; display:none; flex-direction:column; overflow:hidden;">
+
+            <!-- Podium top 3 -->
+            <div class="podium" id="podiumBlock"></div>
+
+            <!-- Ranks 4-10 -->
+            <p class="section-label" id="restLabel" style="display:none;">4 – 10 орын</p>
+            <div class="table-wrapper">
+                <div class="rank-table" id="rankTable"></div>
             </div>
 
-            <h2 class="maintenance-title">Рейтинг жабық</h2>
-            <p class="maintenance-subtitle">
-                Ұлы даланың ең мықты жауынгерлерінің тізімі дайындалуда. 
-                Көп ұзамай өз есіміңді осы жерден көре аласың!
-            </p>
-
-            <a href="main.html" class="btn-back">Артқа қайту</a>
+            <!-- My rank -->
+            <div class="my-rank-panel" id="myRankPanel" style="display:none;">
+                <div>
+                    <div class="my-rank-label">Сіздің орныңыз</div>
+                    <div class="my-rank-coins" id="myCoinsVal">— ТГ</div>
+                </div>
+                <div class="my-rank-pos" id="myRankPos">—</div>
+            </div>
         </div>
     </main>
 
     <script>
-        document.addEventListener('DOMContentLoaded', loadSidebarAvatar);
-
-        // Плавный переход между страницами
-        document.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                if (this.hostname === window.location.hostname && this.getAttribute('href') !== '#') {
-                    e.preventDefault();
-                    document.body.style.transition = 'opacity 0.4s';
-                    document.body.style.opacity = '0';
-                    setTimeout(() => window.location.href = this.href, 400);
-                }
-            });
+        document.addEventListener('DOMContentLoaded', async () => {
+            loadSidebarAvatar();
+            await loadRichestLeaderboard();
         });
+
+        function resolveUrl(url) {
+            if (!url) return 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+            if (url.startsWith('http')) return url;
+            return API_BASE + url;
+        }
+
+        async function loadRichestLeaderboard() {
+            const loadingEl  = document.getElementById('loadingState');
+            const errorEl    = document.getElementById('errorState');
+            const contentEl  = document.getElementById('leaderboardContent');
+
+            try {
+                const res = await apiFetch('/api/v1/leaderboard/richest?limit=10');
+                const data = await res.json();
+
+                loadingEl.style.display = 'none';
+
+                if (!data || data.length === 0) {
+                    errorEl.style.display = 'flex';
+                    document.getElementById('errorMsg').textContent = 'Деректер жоқ. Алғашқы болыңыз!';
+                    return;
+                }
+
+                contentEl.style.display = 'flex';
+
+                renderPodium(data.slice(0, 3));
+                renderTable(data.slice(3));
+                renderMyRank(data);
+
+            } catch (err) {
+                loadingEl.style.display = 'none';
+                errorEl.style.display = 'flex';
+                document.getElementById('errorMsg').textContent = err.message || 'Сервермен байланыс қатесі';
+            }
+        }
+
+        function renderPodium(top3) {
+            const podium = document.getElementById('podiumBlock');
+            podium.innerHTML = '';
+
+            // Places: index 0 = 1st, 1 = 2nd, 2 = 3rd
+            top3.forEach((entry, i) => {
+                const place = i + 1;
+                const item = document.createElement('div');
+                item.className = `podium-item place-${place}`;
+
+                const baseClass = `base-${place}`;
+                const medals = ['🥇', '🥈', '🥉'];
+                const rankColors = ['var(--accent-gold)', '#94a3b8', '#cd7f32'];
+
+                const avatarUrl = resolveUrl(entry.avatar_url);
+                const rarity = entry.rarity || 'common';
+
+                item.innerHTML = `
+                    <div class="podium-avatar-wrap rarity-${rarity}">
+                        ${place === 1 ? '<div class="podium-crown">👑</div>' : ''}
+                        <img class="podium-avatar" src="${avatarUrl}" alt="${entry.name}" 
+                             onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+                    </div>
+                    <div class="podium-name">${escapeHtml(entry.name)}</div>
+                    <div class="podium-coins">💰 ${entry.coins.toLocaleString('ru-RU')}</div>
+                    <div class="podium-base ${baseClass}">
+                        <span style="color:${rankColors[i]}">${medals[i]}</span>
+                    </div>
+                `;
+
+                podium.appendChild(item);
+            });
+        }
+
+        function renderTable(rest) {
+            const table = document.getElementById('rankTable');
+            const label = document.getElementById('restLabel');
+            table.innerHTML = '';
+
+            if (rest.length === 0) return;
+            label.style.display = 'block';
+
+            const me = localStorage.getItem('username') || '';
+
+            rest.forEach((entry, i) => {
+                const rank = i + 4;
+                const isMe = entry.name === me;
+                const avatarUrl = resolveUrl(entry.avatar_url);
+                const rarity = entry.rarity || 'common';
+
+                const row = document.createElement('div');
+                row.className = 'rank-row' + (isMe ? ' is-me' : '');
+                row.style.animationDelay = `${0.05 * i}s`;
+
+                row.innerHTML = `
+                    <div class="rank-number">${rank}</div>
+                    <div class="rank-avatar-wrap rarity-${rarity}">
+                        <img class="rank-avatar" src="${avatarUrl}" alt="${entry.name}"
+                             onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+                    </div>
+                    <div class="rank-name">
+                        ${escapeHtml(entry.name)}
+                        ${isMe ? '<span class="you-badge">СІЗ</span>' : ''}
+                    </div>
+                    <div class="rank-coins"><span class="coin-icon">💰</span>${entry.coins.toLocaleString('ru-RU')}</div>
+                `;
+
+                table.appendChild(row);
+            });
+        }
+
+        function renderMyRank(data) {
+            const me = localStorage.getItem('username') || '';
+            const panel = document.getElementById('myRankPanel');
+            const posEl  = document.getElementById('myRankPos');
+            const coinsEl = document.getElementById('myCoinsVal');
+
+            const idx = data.findIndex(e => e.name === me);
+            if (idx !== -1) {
+                panel.style.display = 'flex';
+                posEl.textContent = `#${idx + 1}`;
+                coinsEl.textContent = `💰 ${data[idx].coins.toLocaleString('ru-RU')} ТГ`;
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
     </script>
 </body>
 </html>

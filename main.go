@@ -493,6 +493,7 @@ type LeaderEntry struct {
 	Rarity    string `json:"rarity"`
 	Score     int    `json:"score"`
 	TimeMs    int    `json:"time_ms"`
+	Coins     int    `json:"coins"`
 }
 
 func GetLeaderboard(c *gin.Context) {
@@ -526,6 +527,42 @@ func GetLeaderboard(c *gin.Context) {
 			Rarity:    avatarRarity,
 			Score:     u.Score,
 			TimeMs:    u.TimeMs,
+			Coins:     u.Coins,
+		}
+	}
+	c.JSON(http.StatusOK, entries)
+}
+
+func GetRichestLeaderboard(c *gin.Context) {
+	limit := 10
+	if l := c.Query("limit"); l != "" {
+		if parsed, err := strconv.Atoi(l); err == nil && parsed > 0 && parsed <= 50 {
+			limit = parsed
+		}
+	}
+
+	var users []User
+	db.Order("coins desc").Limit(limit).Find(&users)
+
+	entries := make([]LeaderEntry, len(users))
+	for i, u := range users {
+		avatarURL := "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+		avatarRarity := "common"
+		for _, a := range allAvatars {
+			if a.ID == u.Avatar {
+				avatarURL = a.URL
+				avatarRarity = a.Rarity
+				break
+			}
+		}
+		entries[i] = LeaderEntry{
+			Name:      u.Username,
+			AvatarURL: avatarURL,
+			AvatarID:  u.Avatar,
+			Rarity:    avatarRarity,
+			Score:     u.Score,
+			TimeMs:    u.TimeMs,
+			Coins:     u.Coins,
 		}
 	}
 	c.JSON(http.StatusOK, entries)
@@ -573,6 +610,7 @@ func main() {
 		{
 			protected.GET("/profile", GetProfile)
 			protected.GET("/leaderboard", GetLeaderboard)
+			protected.GET("/leaderboard/richest", GetRichestLeaderboard)
 			protected.POST("/quiz/submit", SubmitQuiz)
 			protected.GET("/inventory", GetInventory)
 			protected.POST("/shop/open", OpenChest)
