@@ -18,12 +18,64 @@
             height: 100vh;
             overflow: hidden;
         }
+        
+        .game-container {
+            position: relative;
+        }
+
         canvas {
             background-color: #8c9c9d;
             border: 4px solid #bdc3c7;
             box-shadow: 0 0 25px rgba(0,0,0,0.8);
             border-radius: 8px;
+            display: block;
         }
+
+        /* Түймелерге арналған контейнер (Ойын біткенде шығады) */
+        #endGameButtons {
+            display: none;
+            position: absolute;
+            top: 65%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            gap: 20px; /* Түймелер арасындағы қашықтық */
+            z-index: 10;
+        }
+
+        .action-btn {
+            padding: 12px 24px;
+            font-size: 20px;
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            transition: all 0.2s ease-in-out;
+            color: white;
+        }
+
+        .btn-restart {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            border: 2px solid #2ecc71;
+        }
+
+        .btn-restart:hover {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.6);
+        }
+
+        .btn-menu {
+            background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+            border: 2px solid #e74c3c;
+        }
+
+        .btn-menu:hover {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.6);
+        }
+
         .controls-info {
             display: flex;
             justify-content: space-between;
@@ -46,7 +98,14 @@
     <h1 style="margin-bottom: 5px;">Кенесары Көтерілісі: Комбо соққы</h1>
     <div class="features">ЖАҢА КОМБО: "Рывок + Қылыш" (E+F немесе P+K) бірге басып, күшті айналма соққы жасаңыз (50 қуат қажет)!</div>
     
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div class="game-container">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        
+        <div id="endGameButtons">
+            <button class="action-btn btn-restart" onclick="location.reload()">Қайта ойнау</button>
+            <button class="action-btn btn-menu" onclick="window.location.href='main.html'">Мәзірге қайту</button>
+        </div>
+    </div>
 
     <div class="controls-info">
         <div class="player-info p1-color">
@@ -202,7 +261,6 @@ class Player {
 
         if (this.boostTimer > 0) this.boostTimer--;
 
-        // Қалқан логикасы
         if (keys[this.controls.shield] && !this.shieldBroken && this.superActive === 0) {
             this.isShielding = true;
             this.stamina -= 1.5; 
@@ -444,9 +502,8 @@ p2.dirX = -1; p2.dirY = 0;
 let projectiles = []; 
 let gameOver = false;
 
-// ЖАҢА: Ойынның басталу таймері үшін айнымалылар
 let gameStarted = false;
-let countdownFrames = 180; // 60 кадр/сек * 3 секунд = 180 фрейм
+let countdownFrames = 180;
 
 function checkMeleeCollision(attacker) {
     let defender = attacker === p1 ? p2 : p1;
@@ -561,14 +618,12 @@ function spawnRandomPowerUp() {
 }
 
 function gameLoop() {
-    // ЖАҢА: Таймерді тексеру
     if (!gameStarted) {
         countdownFrames--;
-        if (countdownFrames <= -30) { // Экранда "БАСТАЛДЫ" біраз тұруы үшін
+        if (countdownFrames <= -30) { 
             gameStarted = true;
         }
     } else if (!gameOver) {
-        // Ойын процесі тек таймер біткеннен кейін жүреді
         updateTraps();
         p1.update();
         p2.update();
@@ -595,7 +650,6 @@ function gameLoop() {
     p2.draw();
     particles.forEach(p => p.draw()); 
 
-    // ЖАҢА: Таймерді экранға салу
     if (!gameStarted) {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -608,18 +662,16 @@ function gameLoop() {
         let countNum = Math.ceil(countdownFrames / 60);
         let text = countNum > 0 ? countNum : "БАСТАЛДЫ!";
         
-        // Пульсация эффектісі
         ctx.save();
         ctx.translate(canvas.width / 2, canvas.height / 2);
         let scale = 1;
         if (countNum > 0) {
-            scale = 1 + (countdownFrames % 60) / 60 * 0.3; // Цифр үлкейіп-кішірейеді
+            scale = 1 + (countdownFrames % 60) / 60 * 0.3; 
         }
         ctx.scale(scale, scale);
         
-        // Егер "БАСТАЛДЫ!" жазуы шықса, түсін ақ-сары қылу
         if (countNum <= 0) {
-            ctx.fillStyle = '#2ecc71'; // Жасыл түс
+            ctx.fillStyle = '#2ecc71'; 
             ctx.font = 'bold 70px Arial';
         }
 
@@ -643,6 +695,9 @@ function gameLoop() {
         ctx.fillText("ОЙЫН АЯҚТАЛДЫ", canvas.width/2, canvas.height/2 - 20);
         ctx.fillStyle = '#f1c40f';
         ctx.fillText(winnerText, canvas.width/2, canvas.height/2 + 30);
+        
+        // ЖАҢА: Түймелерді экранға шығару
+        document.getElementById('endGameButtons').style.display = 'flex';
     }
 
     requestAnimationFrame(gameLoop);
