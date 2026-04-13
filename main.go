@@ -576,19 +576,41 @@ func main() {
 	initDB()
 	r := gin.Default()
 
-	// 2. Ловушка для всех остальных файлов
-    r.NoRoute(func(c *gin.Context) {
-        path := c.Request.URL.Path
+	r.NoRoute(func(c *gin.Context) {
+    path := c.Request.URL.Path
 
-        // Тот самый IF: если запрашивают index.html (или нужные для игры картинки/стили/скрипты) — отмена переадресации, отдаем файл
-        if path == "/index.html" || strings.HasSuffix(path, ".css") || strings.HasSuffix(path, ".js") || strings.HasSuffix(path, ".png") || strings.HasSuffix(path, ".jpeg") || strings.HasSuffix(path, ".wasm") {
-            c.File("." + path)
-            return
+    // 1. Проверяем расширения файлов, необходимых для работы игры Godot
+    // Добавляем .pck и .wasm — без них проект Godot не запустится
+    isStaticFile := strings.HasSuffix(path, ".html") || 
+                    strings.HasSuffix(path, ".js") || 
+                    strings.HasSuffix(path, ".css") || 
+                    strings.HasSuffix(path, ".wasm") || 
+                    strings.HasSuffix(path, ".pck") || 
+                    strings.HasSuffix(path, ".png") || 
+                    strings.HasSuffix(path, ".jpeg") || 
+                    strings.HasSuffix(path, ".jpg")
+
+    // 2. Если зашли в корень "/" или запрашивают конкретный статичный файл
+    if path == "/" || isStaticFile {
+        if path == "/" {
+            c.File("./index.html")
+        } else {
+            // Убираем лишние точки и проверяем наличие файла на диске
+            filePath := "." + path
+            if _, err := os.Stat(filePath); err == nil {
+                c.File(filePath)
+            } else {
+                // Если файла не существует, кидаем на главную (логин)
+                c.Redirect(http.StatusFound, "/")
+            }
         }
+        return
+    }
 
-        // Во всех остальных случаях (любая другая ссылка) — принудительно перенаправляем на регистрацию/логин
-        c.Redirect(http.StatusFound, "/")
-    })
+    // 3. Если это любая другая ссылка (не файл и не корень), 
+    // принудительно отправляем на главную (страницу логина)
+    c.Redirect(http.StatusFound, "/")
+})
 
 	r.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
