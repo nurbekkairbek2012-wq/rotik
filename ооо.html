@@ -44,7 +44,7 @@
 <body>
 
     <h1 style="margin-bottom: 5px;">Кенесары Көтерілісі: Комбо соққы</h1>
-    <div class="features"></div>
+    <div class="features">ЖАҢА КОМБО: "Рывок + Қылыш" (E+F немесе P+K) бірге басып, күшті айналма соққы жасаңыз (50 қуат қажет)!</div>
     
     <canvas id="gameCanvas" width="800" height="600"></canvas>
 
@@ -187,12 +187,12 @@ class Player {
         this.swordCooldown = 0;
         this.bowCooldown = 0;
         this.dashCooldown = 0;
-        this.superCooldown = 0; // Жаңа: Комбо қайтақталуы
+        this.superCooldown = 0;
         
         this.isShielding = false;
         this.swordActive = 0; 
         this.dashActive = 0;
-        this.superActive = 0; // Жаңа: Комбо активтілігі
+        this.superActive = 0; 
         
         this.boostTimer = 0;
     }
@@ -222,17 +222,15 @@ class Player {
         let currentDashCD = this.boostTimer > 0 ? 30 : 120;
         let currentBowCD = this.boostTimer > 0 ? 15 : 50;
 
-        // КОМБО ТЕКСЕРУ (Қылыш + Рывок бірге)
         let comboPressed = keys[this.controls.sword] && keys[this.controls.dash];
 
         if (comboPressed && this.superCooldown === 0 && this.stamina >= 50 && !this.isShielding) {
-            this.superActive = 20; // 360 градус соққының ұзақтығы
-            this.superCooldown = 180; // 3 секундқа жақын қайтақталу
-            this.stamina -= 50; // Көп қуат алады
-            checkSuperCollision(this); // Комбо соққының зақымы
-            spawnParticles(this.x, this.y, '#e74c3c', 40, 2); // Үлкен жарылыс
+            this.superActive = 20; 
+            this.superCooldown = 180; 
+            this.stamina -= 50; 
+            checkSuperCollision(this); 
+            spawnParticles(this.x, this.y, '#e74c3c', 40, 2); 
         } 
-        // Егер комбо болмаса, жай рывок жасаймыз
         else if (keys[this.controls.dash] && this.dashCooldown === 0 && !this.isShielding && !comboPressed) {
             this.dashActive = 8; 
             this.dashCooldown = currentDashCD; 
@@ -242,7 +240,7 @@ class Player {
         let currentSpeed = this.isShielding ? this.baseSpeed * 0.3 : this.baseSpeed;
         if (this.boostTimer > 0) currentSpeed *= 1.3; 
         if (this.dashActive > 0) currentSpeed = this.baseSpeed * 3.5; 
-        if (this.superActive > 0) currentSpeed = this.baseSpeed * 0.5; // Суперсоққы кезінде баяулайды
+        if (this.superActive > 0) currentSpeed = this.baseSpeed * 0.5; 
 
         let dx = 0, dy = 0;
         if (keys[this.controls.up]) dy -= 1;
@@ -259,7 +257,6 @@ class Player {
             if (!checkObstacleCollision(this.x + moveX, this.y, this.radius)) this.x += moveX;
             if (!checkObstacleCollision(this.x, this.y + moveY, this.radius)) this.y += moveY;
             
-            // Комбо кезінде бағыт өзгермейді, әдемірек көріну үшін
             if (this.superActive === 0) {
                 this.dirX = dx / length;
                 this.dirY = dy / length;
@@ -278,7 +275,6 @@ class Player {
         if (this.dashActive > 0) this.dashActive--;
         if (this.superActive > 0) this.superActive--;
 
-        // Жай қылышпен ұру
         if (keys[this.controls.sword] && !comboPressed && this.swordCooldown === 0 && !this.isShielding && this.dashActive === 0 && this.superActive === 0) {
             this.swordActive = 15;
             this.swordCooldown = 40;
@@ -368,7 +364,6 @@ class Player {
         ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(this.dirX * 25, this.dirY * 25);
         ctx.strokeStyle = 'black'; ctx.lineWidth = 4; ctx.stroke();
 
-        // Жай қылыш
         if (this.swordActive > 0) {
             ctx.beginPath();
             let angle = Math.atan2(this.dirY, this.dirX);
@@ -376,17 +371,16 @@ class Player {
             ctx.strokeStyle = '#ecf0f1'; ctx.lineWidth = 8; ctx.stroke();
         }
         
-        // КОМБО (Суперсоққы 360 градус)
         if (this.superActive > 0) {
             ctx.beginPath();
             ctx.arc(0, 0, 55 + Math.sin(this.superActive)*5, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(231, 76, 60, 0.8)'; // Қызыл вихрь
+            ctx.strokeStyle = 'rgba(231, 76, 60, 0.8)'; 
             ctx.lineWidth = 12; 
             ctx.stroke();
             
             ctx.beginPath();
             ctx.arc(0, 0, 45, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(241, 196, 15, 0.8)'; // Сары вихрь
+            ctx.strokeStyle = 'rgba(241, 196, 15, 0.8)'; 
             ctx.lineWidth = 6; 
             ctx.stroke();
         }
@@ -450,7 +444,10 @@ p2.dirX = -1; p2.dirY = 0;
 let projectiles = []; 
 let gameOver = false;
 
-// Жай қылышпен ұру логикасы
+// ЖАҢА: Ойынның басталу таймері үшін айнымалылар
+let gameStarted = false;
+let countdownFrames = 180; // 60 кадр/сек * 3 секунд = 180 фрейм
+
 function checkMeleeCollision(attacker) {
     let defender = attacker === p1 ? p2 : p1;
     if (defender.hp <= 0) return;
@@ -469,7 +466,6 @@ function checkMeleeCollision(attacker) {
             defender.hp -= 20; 
             spawnParticles(defender.x, defender.y, 'red', 15);
             
-            // Жай итеру
             let pushX = attacker.dirX * 25;
             let pushY = attacker.dirY * 25;
             if (!checkObstacleCollision(defender.x + pushX, defender.y, defender.radius)) defender.x += pushX;
@@ -482,26 +478,23 @@ function checkMeleeCollision(attacker) {
     }
 }
 
-// ЖАҢА: КОМБО ұру логикасы (360 градус аумақ)
 function checkSuperCollision(attacker) {
     let defender = attacker === p1 ? p2 : p1;
     if (defender.hp <= 0) return;
 
-    // Өз айналасында үлкен радиусты тексереді (60 пиксель)
     let dist = Math.hypot(attacker.x - defender.x, attacker.y - defender.y);
     if (dist < 60 + defender.radius) { 
         if (!defender.isShielding) {
-            defender.hp -= 40; // Үлкен зақым
+            defender.hp -= 40; 
             spawnParticles(defender.x, defender.y, 'red', 30);
         } else {
             defender.hp -= 15; 
-            defender.stamina -= 70; // Қалқанды бірден бұзады дерлік
+            defender.stamina -= 70; 
             spawnParticles(defender.x, defender.y, '#f1c40f', 20);
         }
 
-        // Қатты итеру (Қай жақта тұрғанына байланысты ұшырып жібереді)
         let angle = Math.atan2(defender.y - attacker.y, defender.x - attacker.x);
-        let pushX = Math.cos(angle) * 60; // 60 пиксельге ұшырады
+        let pushX = Math.cos(angle) * 60; 
         let pushY = Math.sin(angle) * 60;
         
         if (!checkObstacleCollision(defender.x + pushX, defender.y, defender.radius)) defender.x += pushX;
@@ -568,7 +561,14 @@ function spawnRandomPowerUp() {
 }
 
 function gameLoop() {
-    if (!gameOver) {
+    // ЖАҢА: Таймерді тексеру
+    if (!gameStarted) {
+        countdownFrames--;
+        if (countdownFrames <= -30) { // Экранда "БАСТАЛДЫ" біраз тұруы үшін
+            gameStarted = true;
+        }
+    } else if (!gameOver) {
+        // Ойын процесі тек таймер біткеннен кейін жүреді
         updateTraps();
         p1.update();
         p2.update();
@@ -594,6 +594,38 @@ function gameLoop() {
     p1.draw();
     p2.draw();
     particles.forEach(p => p.draw()); 
+
+    // ЖАҢА: Таймерді экранға салу
+    if (!gameStarted) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = '#f1c40f';
+        ctx.font = 'bold 100px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        let countNum = Math.ceil(countdownFrames / 60);
+        let text = countNum > 0 ? countNum : "БАСТАЛДЫ!";
+        
+        // Пульсация эффектісі
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        let scale = 1;
+        if (countNum > 0) {
+            scale = 1 + (countdownFrames % 60) / 60 * 0.3; // Цифр үлкейіп-кішірейеді
+        }
+        ctx.scale(scale, scale);
+        
+        // Егер "БАСТАЛДЫ!" жазуы шықса, түсін ақ-сары қылу
+        if (countNum <= 0) {
+            ctx.fillStyle = '#2ecc71'; // Жасыл түс
+            ctx.font = 'bold 70px Arial';
+        }
+
+        ctx.fillText(text, 0, 0);
+        ctx.restore();
+    }
 
     if (gameOver) {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
